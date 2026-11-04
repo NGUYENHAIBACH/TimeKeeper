@@ -2,7 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
+import '../../features/auth/view/forgot_password_screen.dart';
+import '../../features/auth/view/login_screen.dart';
+import '../../features/auth/view/register_screen.dart';
 import '../../features/auth/view/splash_screen.dart';
+import '../../features/home/view/home_screen.dart';
 import '../../features/auth/viewmodel/auth_state_provider.dart';
 import '../widgets/placeholder_screen.dart';
 import 'app_routes.dart';
@@ -48,19 +52,19 @@ GoRouter router(Ref ref) {
       ),
       GoRoute(
         path: AppRoutes.login,
-        builder: (_, _) => const PlaceholderScreen(title: 'Đăng nhập', owner: 'TV1'),
+        builder: (_, _) => const LoginScreen(),
       ),
       GoRoute(
         path: AppRoutes.register,
-        builder: (_, _) => const PlaceholderScreen(title: 'Đăng ký', owner: 'TV1'),
+        builder: (_, _) => const RegisterScreen(),
       ),
       GoRoute(
         path: AppRoutes.forgotPassword,
-        builder: (_, _) => const PlaceholderScreen(title: 'Quên mật khẩu', owner: 'TV1'),
+        builder: (_, _) => const ForgotPasswordScreen(),
       ),
       GoRoute(
         path: AppRoutes.home,
-        builder: (_, _) => const PlaceholderScreen(title: 'Trang chủ', owner: 'TV1'),
+        builder: (_, _) => const HomeScreen(),
       ),
       GoRoute(
         path: AppRoutes.profile,
