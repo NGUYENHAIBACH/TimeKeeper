@@ -11,7 +11,7 @@ flutter pub get
 ```
 
 1. Copy `lib/core/constants/env.example.dart` → `lib/core/constants/env.dart`, điền URL và publishable key Supabase (hỏi TV1). File `env.dart` **không commit**.
-2. Lấy `lib/firebase_options.dart` và `android/app/google-services.json` từ TV1 (hoặc tự chạy `flutterfire configure` với project Firebase của nhóm).
+2. Firebase đã cấu hình sẵn trong repo (`lib/firebase_options.dart`, `android/app/google-services.json`, project `timekeeper-prm393`). Không cần chạy `flutterfire configure`. Muốn test Google Sign-In trên máy mình thì gửi SHA-1 debug cho TV1 thêm vào Firebase (lấy bằng `cd android && ./gradlew signingReport`).
 3. Windows: bật **Developer Mode** (Settings → System → For developers) vì plugin Flutter cần symlink.
 4. Sinh code và chạy:
 
