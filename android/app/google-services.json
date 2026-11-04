@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "650794462799",
+    "project_id": "timekeeper-prm393",
+    "storage_bucket": "timekeeper-prm393.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:650794462799:android:61941977ce7829350d843a",
+        "android_client_info": {
+          "package_name": "com.prm393.timekeeper"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "650794462799-p47daki8cso3s08rrj8d077gt9f3d4b1.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.prm393.timekeeper",
+            "certificate_hash": "7ed690880e2a22fef7ba91a17695f7a7013082b5"
+          }
+        },
+        {
+          "client_id": "650794462799-7n526kc6tkgs64e9jva0lr0fht99amre.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBv1SVMEVIDS_AvQTSx9ampoMuf2U-9c1g"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "650794462799-7n526kc6tkgs64e9jva0lr0fht99amre.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
