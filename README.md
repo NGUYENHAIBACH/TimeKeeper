@@ -34,19 +34,18 @@ lib/
 │   ├── theme/       app_theme.dart
 │   ├── utils/       validators, ot_calculator, leave_calculator
 │   └── widgets/     AppTextField, AppButton, LoadingView, ErrorView, PlaceholderScreen
-├── data/
-│   ├── models/        freezed models
-│   ├── datasources/   gọi Supabase / SQLite / Firebase
-│   └── repositories/  gom datasource, cung cấp cho ViewModel
-├── features/
-│   ├── auth/        TV1   ├── attendance/  TV2   ├── overtime/  TV3
-│   ├── home/        TV1   ├── leave/       TV4   └── approval/  TV5
-│   └── settings/    TV1
+├── models/          Model: freezed + json (profile.dart, app_settings.dart, ...)
+├── datasources/     gọi Supabase / SQLite / Firebase (1 file / bảng)
+├── repositories/    gom datasource, cung cấp cho ViewModel
+├── viewmodels/<module>/   ViewModel: `@riverpod class ... extends _$...`
+├── views/<module>/        View: `*_screen.dart` (ConsumerWidget)
+│   module = auth, home, settings (TV1) · attendance (TV2) · overtime (TV3)
+│            · leave (TV4) · approval (TV5)
 └── main.dart
 supabase/schema.sql, seed.sql
 ```
 
-Mỗi feature có `view/<ten>_screen.dart` và `viewmodel/<ten>_viewmodel.dart`.
+MVVM kiểu cổ điển: `models/` là Model, `views/<module>/` là View, `viewmodels/<module>/` là ViewModel. Import luôn dùng dạng `package:timekeeper/...`, không dùng đường dẫn tương đối.
 
 ## 3. Quy ước Riverpod (bắt buộc)
 
