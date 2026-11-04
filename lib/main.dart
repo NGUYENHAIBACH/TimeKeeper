@@ -10,7 +10,7 @@ import 'core/constants/env.dart';
 import 'core/providers/core_providers.dart';
 import 'core/router/app_router.dart';
 import 'core/theme/app_theme.dart';
-import 'features/settings/viewmodel/settings_viewmodel.dart';
+import 'viewmodels/settings/settings_viewmodel.dart';
 import 'firebase_options.dart';
 
 /// Điểm vào app: khởi tạo Firebase, Supabase, SharedPreferences rồi chạy

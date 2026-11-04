@@ -2,13 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-import '../../features/auth/view/forgot_password_screen.dart';
-import '../../features/auth/view/login_screen.dart';
-import '../../features/auth/view/register_screen.dart';
-import '../../features/auth/view/splash_screen.dart';
-import '../../features/home/view/home_screen.dart';
-import '../../features/auth/viewmodel/auth_state_provider.dart';
-import '../widgets/placeholder_screen.dart';
+import 'package:timekeeper/views/auth/forgot_password_screen.dart';
+import 'package:timekeeper/views/auth/login_screen.dart';
+import 'package:timekeeper/views/auth/register_screen.dart';
+import 'package:timekeeper/views/auth/splash_screen.dart';
+import 'package:timekeeper/views/home/home_screen.dart';
+import 'package:timekeeper/viewmodels/auth/auth_state_provider.dart';
+import 'package:timekeeper/core/widgets/placeholder_screen.dart';
 import 'app_routes.dart';
 
 part 'app_router.g.dart';
