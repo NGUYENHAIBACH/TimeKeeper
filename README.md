@@ -1,0 +1,92 @@
+# TimeKeeper — App Chấm công, OT & Nghỉ phép (PRM393)
+
+Flutter + Firebase Auth + Supabase + Riverpod 3 (MVVM).
+
+## 1. Chạy project lần đầu
+
+```bash
+git clone <repo-url>
+cd timekeeper
+flutter pub get
+```
+
+1. Copy `lib/core/constants/env.example.dart` → `lib/core/constants/env.dart`, điền URL và publishable key Supabase (hỏi TV1). File `env.dart` **không commit**.
+2. Lấy `lib/firebase_options.dart` và `android/app/google-services.json` từ TV1 (hoặc tự chạy `flutterfire configure` với project Firebase của nhóm).
+3. Windows: bật **Developer Mode** (Settings → System → For developers) vì plugin Flutter cần symlink.
+4. Sinh code và chạy:
+
+```bash
+dart run build_runner watch -d
+```
+
+```bash
+flutter run
+```
+
+## 2. Cấu trúc thư mục
+
+```
+lib/
+├── core/
+│   ├── constants/   env.dart (không commit), env.example.dart
+│   ├── providers/   core_providers.dart  (firebaseAuth, supabase, sharedPrefs)
+│   ├── router/      app_router.dart, app_routes.dart
+│   ├── theme/       app_theme.dart
+│   ├── utils/       validators, ot_calculator, leave_calculator
+│   └── widgets/     AppTextField, AppButton, LoadingView, ErrorView, PlaceholderScreen
+├── data/
+│   ├── models/        freezed models
+│   ├── datasources/   gọi Supabase / SQLite / Firebase
+│   └── repositories/  gom datasource, cung cấp cho ViewModel
+├── features/
+│   ├── auth/        TV1   ├── attendance/  TV2   ├── overtime/  TV3
+│   ├── home/        TV1   ├── leave/       TV4   └── approval/  TV5
+│   └── settings/    TV1
+└── main.dart
+supabase/schema.sql, seed.sql
+```
+
+Mỗi feature có `view/<ten>_screen.dart` và `viewmodel/<ten>_viewmodel.dart`.
+
+## 3. Quy ước Riverpod (bắt buộc)
+
+- Mọi provider dùng `@riverpod` / `@Riverpod(keepAlive: true)` + `part 'x.g.dart';`. Không viết provider tay, không dùng `StateProvider`.
+- keepAlive: core providers, DataSource, Repository, `authState`, `SettingsViewModel`, `router`. ViewModel màn hình để autoDispose mặc định.
+- ViewModel bất đồng bộ:
+
+```dart
+@riverpod
+class OtListViewModel extends _$OtListViewModel {
+  @override
+  Future<List<OtRequest>> build() => ref.watch(otRepositoryProvider).getMyRequests();
+
+  Future<void> refresh() async {
+    state = const AsyncLoading();
+    state = await AsyncValue.guard(() => ref.read(otRepositoryProvider).getMyRequests());
+  }
+}
+```
+
+- View là `ConsumerWidget`: `ref.watch` để hiển thị, `ref.read(x.notifier)` để gọi hành động, `ref.listen` để hiện SnackBar lỗi. Mỗi màn xử lý đủ 3 trạng thái bằng `AsyncValue.when` với `LoadingView` / `ErrorView`.
+- Riverpod 3: dùng `.value` (không có `valueOrNull`).
+- View **không** gọi Firebase/Supabase trực tiếp.
+
+## 4. Quy ước dữ liệu
+
+- Mọi bảng nghiệp vụ tham chiếu `profiles.id` qua `employee_id`. Lấy profile hiện tại từ `profileViewModelProvider` (TV1).
+- Trạng thái đơn: `pending` / `approved` / `rejected` / `cancelled`.
+- Điều hướng chỉ dùng hằng trong `AppRoutes`, ví dụ `context.go(AppRoutes.checkin)`.
+- Thêm/sửa bảng: sửa `supabase/schema.sql` rồi chạy lại trên SQL Editor. Không dùng service_role / secret key.
+
+## 5. Git
+
+- Nhánh `feature/<module>` (vd `feature/attendance`), Pull Request vào `main`.
+- Commit nhỏ, message dạng `feat(attendance): check-in bằng GPS`, `fix(leave): tính ngày nghỉ bỏ cuối tuần`.
+- Không commit `env.dart`, file build, `.g.dart`/`.freezed.dart` thì **có** commit để clone về chạy được ngay.
+
+## 6. Checklist mỗi screen (yêu cầu môn)
+
+- [ ] ViewModel Riverpod riêng, đủ loading / error / data
+- [ ] Đọc/ghi dữ liệu thật (Supabase / SQLite / SharedPreferences)
+- [ ] Có nghiệp vụ: form + validation, lọc, duyệt hoặc tính toán
+- [ ] Comment cho class và hàm public
