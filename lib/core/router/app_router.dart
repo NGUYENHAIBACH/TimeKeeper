@@ -7,6 +7,8 @@ import 'package:timekeeper/views/auth/login_screen.dart';
 import 'package:timekeeper/views/auth/register_screen.dart';
 import 'package:timekeeper/views/auth/splash_screen.dart';
 import 'package:timekeeper/views/home/home_screen.dart';
+import 'package:timekeeper/views/settings/profile_screen.dart';
+import 'package:timekeeper/views/settings/settings_screen.dart';
 import 'package:timekeeper/viewmodels/auth/auth_state_provider.dart';
 import 'package:timekeeper/core/widgets/placeholder_screen.dart';
 import 'app_routes.dart';
@@ -68,11 +70,11 @@ GoRouter router(Ref ref) {
       ),
       GoRoute(
         path: AppRoutes.profile,
-        builder: (_, _) => const PlaceholderScreen(title: 'Hồ sơ', owner: 'TV1'),
+        builder: (_, _) => const ProfileScreen(),
       ),
       GoRoute(
         path: AppRoutes.settings,
-        builder: (_, _) => const PlaceholderScreen(title: 'Cài đặt', owner: 'TV1'),
+        builder: (_, _) => const SettingsScreen(),
       ),
 
       // ----- TV2: Chấm công -----

@@ -3,6 +3,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import 'package:timekeeper/core/providers/core_providers.dart';
 import 'package:timekeeper/models/app_settings.dart';
+import 'package:timekeeper/repositories/biometric_repository.dart';
 
 part 'settings_viewmodel.g.dart';
 
@@ -51,10 +52,21 @@ class SettingsViewModel extends _$SettingsViewModel {
     state = state.copyWith(reminderCheckoutTime: time);
   }
 
-  /// Bật/tắt xác thực vân tay.
-  Future<void> setBiometricEnabled(bool enabled) async {
+  /// Bật/tắt xác thực vân tay. Khi BẬT phải qua được hai bước: thiết bị có
+  /// vân tay, và người dùng xác thực thành công. Trả về false nếu không bật
+  /// được (View hiện thông báo), true nếu đã lưu.
+  Future<bool> setBiometricEnabled(bool enabled) async {
+    if (enabled) {
+      final biometric = ref.read(biometricRepositoryProvider);
+      if (!await biometric.isAvailable()) return false;
+      final ok = await biometric.authenticate(
+        reason: 'Xác thực để bật chấm công bằng vân tay',
+      );
+      if (!ok) return false;
+    }
     await ref.read(sharedPrefsProvider).setBool(AppSettingsKeys.biometricEnabled, enabled);
     state = state.copyWith(biometricEnabled: enabled);
+    return true;
   }
 
   Future<void> _setNullableString(String key, String? value) async {
