@@ -147,6 +147,8 @@ class SettingsScreen extends ConsumerWidget {
             child: const Text('Hủy'),
           ),
           FilledButton(
+            // Theme chung đặt nút rộng hết cỡ; trong hộp thoại cần nút gọn.
+            style: FilledButton.styleFrom(minimumSize: const Size(64, 40)),
             onPressed: () => Navigator.of(ctx).pop(true),
             child: const Text('Đăng xuất'),
           ),
