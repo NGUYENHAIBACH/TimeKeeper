@@ -41,8 +41,15 @@ class HomeViewModel extends _$HomeViewModel {
   }
 
   /// Kéo để tải lại (pull-to-refresh) hoặc bấm "Thử lại" khi lỗi.
+  /// Đọc lại cả hồ sơ, vì vai trò / phòng ban có thể vừa được admin đổi
+  /// trên Supabase. Dữ liệu cũ vẫn hiển thị trong lúc tải.
   Future<void> refresh() async {
-    state = const AsyncLoading();
-    state = await AsyncValue.guard(build);
+    ref.invalidate(profileViewModelProvider);
+    ref.invalidateSelf();
+    try {
+      await future;
+    } catch (_) {
+      // Lỗi đã nằm trong state (AsyncError); View tự hiển thị.
+    }
   }
 }
