@@ -16,6 +16,18 @@ class AppRoutes {
   static const checkin = '/attendance/checkin';
   static const attendanceCalendar = '/attendance/calendar';
   static const attendanceDay = '/attendance/day'; // + ?date=yyyy-MM-dd
+  static const attendanceCorrection = '/attendance/correction'; // + ?date=yyyy-MM-dd
+
+  /// Đường dẫn chi tiết ngày công, vd `/attendance/day?date=2026-11-05`.
+  static String attendanceDayOf(DateTime day) => '$attendanceDay?date=${_dateKey(day)}';
+
+  /// Đường dẫn form đơn bù công của ngày [day].
+  static String attendanceCorrectionOf(DateTime day) =>
+      '$attendanceCorrection?date=${_dateKey(day)}';
+
+  static String _dateKey(DateTime d) =>
+      '${d.year.toString().padLeft(4, '0')}-${d.month.toString().padLeft(2, '0')}'
+      '-${d.day.toString().padLeft(2, '0')}';
 
   // ----- TV3: OT + Báo cáo -----
   static const otForm = '/overtime/new';

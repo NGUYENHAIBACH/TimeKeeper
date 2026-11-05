@@ -3,6 +3,7 @@ import 'dart:developer' as dev;
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/date_symbol_data_local.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -30,6 +31,9 @@ Future<void> main() async {
   await Supabase.initialize(url: Env.supabaseUrl, publishableKey: Env.supabasePublishableKey);
 
   final prefs = await SharedPreferences.getInstance();
+
+  // Tên thứ/tháng tiếng Việt cho lịch (table_calendar, intl) - TV2.
+  await initializeDateFormatting('vi_VN');
 
   runApp(
     ProviderScope(
