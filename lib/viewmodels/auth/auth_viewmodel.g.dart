@@ -45,7 +45,7 @@ final class AuthViewModelProvider
   AuthViewModel create() => AuthViewModel();
 }
 
-String _$authViewModelHash() => r'4aab6ee08bfc7b11aad1b4e39f3c666220b091fd';
+String _$authViewModelHash() => r'c04b066bc27099f15ae6543fe1961b5e9f2a874f';
 
 /// ViewModel cho Login / Register / Quên mật khẩu.
 /// State là `AsyncValue<void>`: chỉ cần biết đang xử lý, lỗi, hay xong.

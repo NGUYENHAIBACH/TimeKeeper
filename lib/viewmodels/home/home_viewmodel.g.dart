@@ -48,7 +48,7 @@ final class HomeViewModelProvider
   HomeViewModel create() => HomeViewModel();
 }
 
-String _$homeViewModelHash() => r'1f2fde9203f927f99634eadd70d7a8f1edd5790d';
+String _$homeViewModelHash() => r'cf140147158d7ae10a1faba5684d2645f35482ef';
 
 /// ViewModel màn Home Dashboard.
 /// Gom hồ sơ (TV1) + chấm công hôm nay và tổng giờ tháng (TV2) + số phép

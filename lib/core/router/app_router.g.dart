@@ -15,6 +15,10 @@ part of 'app_router.dart';
 /// - Chưa đăng nhập mà vào route private  -> Login
 /// - Đã đăng nhập mà vào Login/Register   -> Home
 ///
+/// Chỉ có MỘT GoRouter suốt vòng đời app. Khi `authState` đổi ta không tạo
+/// router mới (sẽ mất ngăn xếp màn hình) mà báo router chạy lại `redirect`
+/// thông qua `refreshListenable`.
+///
 /// Mỗi thành viên thay `PlaceholderScreen` của route mình bằng screen thật.
 
 @ProviderFor(router)
@@ -27,6 +31,10 @@ final routerProvider = RouterProvider._();
 /// - Chưa đăng nhập mà vào route private  -> Login
 /// - Đã đăng nhập mà vào Login/Register   -> Home
 ///
+/// Chỉ có MỘT GoRouter suốt vòng đời app. Khi `authState` đổi ta không tạo
+/// router mới (sẽ mất ngăn xếp màn hình) mà báo router chạy lại `redirect`
+/// thông qua `refreshListenable`.
+///
 /// Mỗi thành viên thay `PlaceholderScreen` của route mình bằng screen thật.
 
 final class RouterProvider
@@ -38,6 +46,10 @@ final class RouterProvider
   /// - Firebase chưa khôi phục xong phiên  -> ở Splash
   /// - Chưa đăng nhập mà vào route private  -> Login
   /// - Đã đăng nhập mà vào Login/Register   -> Home
+  ///
+  /// Chỉ có MỘT GoRouter suốt vòng đời app. Khi `authState` đổi ta không tạo
+  /// router mới (sẽ mất ngăn xếp màn hình) mà báo router chạy lại `redirect`
+  /// thông qua `refreshListenable`.
   ///
   /// Mỗi thành viên thay `PlaceholderScreen` của route mình bằng screen thật.
   RouterProvider._()
@@ -73,4 +85,4 @@ final class RouterProvider
   }
 }
 
-String _$routerHash() => r'0bd847cf23f58f6bdd6b7307096f0a990aee71f0';
+String _$routerHash() => r'9ca3d27d866a4cc63c99b6cd94f670354220b6d0';

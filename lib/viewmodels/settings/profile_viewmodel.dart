@@ -1,5 +1,5 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-
 import 'package:timekeeper/models/profile.dart';
 import 'package:timekeeper/repositories/profile_repository.dart';
 import 'package:timekeeper/viewmodels/auth/auth_state_provider.dart';
@@ -17,7 +17,15 @@ class ProfileViewModel extends _$ProfileViewModel {
   Future<Profile?> build() async {
     final user = await ref.watch(authStateProvider.future);
     if (user == null) return null;
-    return ref.read(profileRepositoryProvider).getByUid(user.uid);
+    return _load(user);
+  }
+
+  /// Đọc hồ sơ theo uid. Nếu Supabase chưa có dòng nào (lần đầu đăng nhập,
+  /// hoặc Home mở trước khi AuthViewModel kịp đồng bộ) thì tự tạo, để người
+  /// đã đăng nhập LUÔN có hồ sơ và các module khác luôn có `employee_id`.
+  Future<Profile> _load(User user) async {
+    final repo = ref.read(profileRepositoryProvider);
+    return await repo.getByUid(user.uid) ?? await repo.syncAfterLogin(user);
   }
 
   /// Tải lại hồ sơ từ Supabase (sau khi admin đổi role chẳng hạn).
@@ -26,7 +34,7 @@ class ProfileViewModel extends _$ProfileViewModel {
     state = await AsyncValue.guard(() async {
       final user = await ref.read(authStateProvider.future);
       if (user == null) return null;
-      return ref.read(profileRepositoryProvider).getByUid(user.uid);
+      return _load(user);
     });
   }
 
