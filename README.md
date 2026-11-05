@@ -89,3 +89,15 @@ class OtListViewModel extends _$OtListViewModel {
 - [ ] Đọc/ghi dữ liệu thật (Supabase / SQLite / SharedPreferences)
 - [ ] Có nghiệp vụ: form + validation, lọc, duyệt hoặc tính toán
 - [ ] Comment cho class và hàm public
+
+## 7. Trạng thái phần TV1 (đã xong)
+
+| Screen | View | ViewModel | Dữ liệu |
+|---|---|---|---|
+| Login / Register / Quên mật khẩu | `views/auth/*` | `AuthViewModel` | Firebase Auth → upsert `profiles` (Supabase) |
+| Home Dashboard | `views/home/home_screen.dart` | `HomeViewModel` | `profiles`, `attendance_records`, `leave_balances` |
+| Profile & Settings | `views/settings/*` | `ProfileViewModel`, `SettingsViewModel` | `profiles` + bucket `avatars`, SharedPreferences |
+
+TV1 cung cấp cho nhóm: `authStateProvider`, `profileViewModelProvider` (lấy `employee_id`, role),
+`settingsViewModelProvider` (giờ nhắc, vân tay), interface `AttendanceRepository` / `LeaveRepository`
+kèm bản mock. Chi tiết: `docs/HUONG_DAN.md` mục 6.
