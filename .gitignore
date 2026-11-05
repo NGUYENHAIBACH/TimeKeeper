@@ -49,3 +49,14 @@ app.*.map.json
 
 # Cau hinh moi truong (Supabase URL + anon key). Dung env.example.dart lam mau.
 lib/core/constants/env.dart
+
+# Nen tang khong dung (app chi cau hinh cho Android). Can thi chay: flutter create --platforms=ios,web .
+/ios/
+/web/
+/windows/
+/linux/
+/macos/
+
+# Tai lieu / file ca nhan, khong day len GitHub
+/_khong_push/
+/docs/HUONG_DAN.md

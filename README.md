@@ -100,4 +100,4 @@ class OtListViewModel extends _$OtListViewModel {
 
 TV1 cung cấp cho nhóm: `authStateProvider`, `profileViewModelProvider` (lấy `employee_id`, role),
 `settingsViewModelProvider` (giờ nhắc, vân tay), interface `AttendanceRepository` / `LeaveRepository`
-kèm bản mock. Chi tiết: `docs/HUONG_DAN.md` mục 6.
+kèm bản mock (`lib/repositories/mock/mock_repositories.dart`).
