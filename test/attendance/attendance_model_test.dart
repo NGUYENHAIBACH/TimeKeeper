@@ -1,8 +1,9 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:timekeeper/core/utils/attendance_status.dart';
-import 'package:timekeeper/data/models/attendance_correction.dart';
-import 'package:timekeeper/data/models/attendance_record.dart';
-import 'package:timekeeper/data/models/office_location.dart';
+import 'package:timekeeper/models/attendance_correction.dart';
+import 'package:timekeeper/models/attendance_record.dart';
+import 'package:timekeeper/models/office_location.dart';
+import 'package:timekeeper/models/work_shift.dart';
 
 void main() {
   group('AttendanceRecord map', () {
@@ -73,6 +74,23 @@ void main() {
     const o = OfficeLocation(id: 'o', name: 'VP', latitude: 1, longitude: 2, radiusMeters: 150);
     final back = OfficeLocation.fromMap(o.toLocal());
     expect(back, o);
+  });
+
+  test('WorkShift đọc dòng shifts của Supabase (giờ HH:mm:ss) và đọc lại từ SQLite', () {
+    final s = WorkShift.fromMap({
+      'id': 's1',
+      'name': 'Ca chieu',
+      'start_time': '14:00:00',
+      'end_time': '22:00:00',
+      'grace_minutes': 10,
+    });
+    expect((s.startHour, s.startMinute, s.endHour, s.lateGraceMinutes), (14, 0, 22, 10));
+    final back = WorkShift.fromMap(s.toLocal());
+    expect((back.id, back.startHour, back.endHour, back.lateGraceMinutes), ('s1', 14, 22, 10));
+    // Vào 14:08 với ca chiều (cho trễ 10 phút) thì không tính muộn.
+    final calc = AttendanceStatusCalculator(shift: s);
+    expect(calc.isLateAt(DateTime(2026, 11, 2, 14, 8)), isFalse);
+    expect(calc.lateMinutesAt(DateTime(2026, 11, 2, 14, 30)), 30);
   });
 
   group('AttendanceStatusCalculator - phút muộn / về sớm', () {

@@ -1,5 +1,5 @@
-import '../../data/models/attendance_correction.dart';
-import 'date_utils.dart';
+import 'package:timekeeper/models/attendance_correction.dart';
+import 'package:timekeeper/core/utils/date_utils.dart';
 
 /// Kiểm tra đơn bù công trước khi gửi. Trả về danh sách lỗi (rỗng = hợp lệ).
 class CorrectionValidator {

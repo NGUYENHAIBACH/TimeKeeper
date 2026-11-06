@@ -2,13 +2,17 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-import '../../features/attendance/view/attendance_calendar_screen.dart';
-import '../../features/attendance/view/check_in_screen.dart';
-import '../../features/attendance/view/correction_form_screen.dart';
-import '../../features/attendance/view/day_detail_screen.dart';
-import '../../features/auth/view/splash_screen.dart';
-import '../../features/auth/viewmodel/auth_state_provider.dart';
-import '../widgets/placeholder_screen.dart';
+import 'package:timekeeper/views/attendance/attendance_calendar_screen.dart';
+import 'package:timekeeper/views/attendance/check_in_screen.dart';
+import 'package:timekeeper/views/attendance/correction_form_screen.dart';
+import 'package:timekeeper/views/attendance/day_detail_screen.dart';
+import 'package:timekeeper/views/auth/forgot_password_screen.dart';
+import 'package:timekeeper/views/auth/login_screen.dart';
+import 'package:timekeeper/views/auth/register_screen.dart';
+import 'package:timekeeper/views/auth/splash_screen.dart';
+import 'package:timekeeper/views/home/home_screen.dart';
+import 'package:timekeeper/viewmodels/auth/auth_state_provider.dart';
+import 'package:timekeeper/core/widgets/placeholder_screen.dart';
 import 'app_routes.dart';
 
 part 'app_router.g.dart';
@@ -59,19 +63,19 @@ GoRouter router(Ref ref) {
       ),
       GoRoute(
         path: AppRoutes.login,
-        builder: (_, _) => const PlaceholderScreen(title: 'Đăng nhập', owner: 'TV1'),
+        builder: (_, _) => const LoginScreen(),
       ),
       GoRoute(
         path: AppRoutes.register,
-        builder: (_, _) => const PlaceholderScreen(title: 'Đăng ký', owner: 'TV1'),
+        builder: (_, _) => const RegisterScreen(),
       ),
       GoRoute(
         path: AppRoutes.forgotPassword,
-        builder: (_, _) => const PlaceholderScreen(title: 'Quên mật khẩu', owner: 'TV1'),
+        builder: (_, _) => const ForgotPasswordScreen(),
       ),
       GoRoute(
         path: AppRoutes.home,
-        builder: (_, _) => const PlaceholderScreen(title: 'Trang chủ', owner: 'TV1'),
+        builder: (_, _) => const HomeScreen(),
       ),
       GoRoute(
         path: AppRoutes.profile,

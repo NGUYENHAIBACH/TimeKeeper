@@ -1,8 +1,8 @@
 import 'package:timekeeper/core/utils/attendance_status.dart';
 import 'package:timekeeper/core/utils/correction_validator.dart';
 import 'package:timekeeper/core/utils/geo_fence.dart';
-import 'package:timekeeper/data/models/attendance_correction.dart';
-import 'package:timekeeper/data/models/attendance_record.dart';
+import 'package:timekeeper/models/attendance_correction.dart';
+import 'package:timekeeper/models/attendance_record.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 AttendanceRecord rec(DateTime day, {DateTime? inAt, DateTime? outAt}) =>

@@ -1,6 +1,6 @@
-import '../../data/models/attendance_record.dart';
-import '../../data/models/work_shift.dart';
-import 'date_utils.dart';
+import 'package:timekeeper/models/attendance_record.dart';
+import 'package:timekeeper/models/work_shift.dart';
+import 'package:timekeeper/core/utils/date_utils.dart';
 
 /// Trạng thái một ngày công, dùng để tô màu lịch.
 enum AttendanceStatus {
