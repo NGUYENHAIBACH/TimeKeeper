@@ -63,6 +63,7 @@ dependencies:
   latlong2: 0.10.1
   uuid: 4.6.0
   path: 1.9.1
+  file_picker: ^13.3.2
 
 dev_dependencies:
   flutter_test:
