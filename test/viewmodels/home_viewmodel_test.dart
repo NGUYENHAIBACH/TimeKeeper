@@ -1,11 +1,10 @@
-// Unit test HomeViewModel với repository giả (cùng interface với bản thật).
+// Unit test HomeViewModel với repository giả (cùng interface với bản thật
+// của TV2 và TV4).
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:timekeeper/models/leave_balance_summary.dart';
-import 'package:timekeeper/models/monthly_summary.dart';
 import 'package:timekeeper/models/profile.dart';
-import 'package:timekeeper/models/today_attendance.dart';
 import 'package:timekeeper/repositories/attendance_repository.dart';
 import 'package:timekeeper/repositories/leave_repository.dart';
 import 'package:timekeeper/repositories/mock/mock_repositories.dart';
@@ -24,8 +23,9 @@ ProviderContainer _container({
     retry: (_, _) => null,
     overrides: [
       profileViewModelProvider.overrideWith(() => FakeProfileViewModel(profile)),
+      // Provider của TV2 là bất đồng bộ (mở SQLite) nên override bằng hàm async.
       attendanceRepositoryProvider
-          .overrideWithValue(attendance ?? MockAttendanceRepository()),
+          .overrideWith((ref) async => attendance ?? MockAttendanceRepository()),
       leaveRepositoryProvider.overrideWithValue(leave ?? MockLeaveRepository()),
     ],
   );
@@ -37,16 +37,11 @@ ProviderContainer _container({
 
 void main() {
   test('gom đủ hồ sơ, chấm công, tổng tháng và số phép', () async {
-    final today = TodayAttendance(
-      id: 'a1',
-      workDate: DateTime(2026, 11, 5),
-      checkInAt: DateTime(2026, 11, 5, 8, 2),
-      lateMinutes: 2,
-    );
+    final today = attendanceOf(5, checkIn: (8, 2), late: 2);
     final c = _container(
       attendance: MockAttendanceRepository(
         today: today,
-        summary: const MonthlySummary(totalHours: 40, workDays: 5, lateDays: 1),
+        monthRecords: [...sampleMonthRecords, today],
       ),
       leave: MockLeaveRepository(
         balance: const LeaveBalanceSummary(totalDays: 12, usedDays: 2),
@@ -58,16 +53,21 @@ void main() {
     expect(dashboard, isNotNull);
     expect(dashboard!.profile.email, testProfile.email);
     expect(dashboard.today, today);
-    expect(dashboard.today!.isWorking, isTrue);
-    expect(dashboard.summary.totalHours, 40);
-    expect(dashboard.summary.workDays, 5);
+    expect(dashboard.today!.hasCheckedIn, isTrue);
+    expect(dashboard.today!.hasCheckedOut, isFalse);
+    // 8 + 7.5 + 0 (hôm nay chưa check-out) giờ; 3 ngày có check-in; 2 ngày trễ.
+    expect(dashboard.summary.totalHours, 15.5);
+    expect(dashboard.summary.workDays, 3);
+    expect(dashboard.summary.lateDays, 2);
     expect(dashboard.leave.remainingDays, 10);
   });
 
-  test('chưa chấm công hôm nay -> today = null', () async {
+  test('chưa chấm công hôm nay -> today = null, số liệu tháng bằng 0', () async {
     final c = _container();
     final dashboard = await c.read(homeViewModelProvider.future);
     expect(dashboard!.today, isNull);
+    expect(dashboard.summary.totalHours, 0);
+    expect(dashboard.summary.workDays, 0);
   });
 
   test('chưa đăng nhập -> null, không gọi repository', () async {

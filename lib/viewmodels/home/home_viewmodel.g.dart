@@ -9,8 +9,9 @@ part of 'home_viewmodel.dart';
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // ignore_for_file: type=lint, type=warning
 /// ViewModel màn Home Dashboard.
-/// Gom hồ sơ (TV1) + chấm công hôm nay và tổng giờ tháng (TV2) + số phép
-/// còn (TV4) thành một [HomeDashboard]. Trả null khi chưa đăng nhập.
+/// Gom hồ sơ (TV1) + chấm công hôm nay và tổng giờ tháng (repository của
+/// TV2) + số phép còn (TV4) thành một [HomeDashboard]. Trả null khi chưa
+/// đăng nhập.
 ///
 /// autoDispose: rời Home là giải phóng, quay lại sẽ tải dữ liệu mới.
 
@@ -18,15 +19,17 @@ part of 'home_viewmodel.dart';
 final homeViewModelProvider = HomeViewModelProvider._();
 
 /// ViewModel màn Home Dashboard.
-/// Gom hồ sơ (TV1) + chấm công hôm nay và tổng giờ tháng (TV2) + số phép
-/// còn (TV4) thành một [HomeDashboard]. Trả null khi chưa đăng nhập.
+/// Gom hồ sơ (TV1) + chấm công hôm nay và tổng giờ tháng (repository của
+/// TV2) + số phép còn (TV4) thành một [HomeDashboard]. Trả null khi chưa
+/// đăng nhập.
 ///
 /// autoDispose: rời Home là giải phóng, quay lại sẽ tải dữ liệu mới.
 final class HomeViewModelProvider
     extends $AsyncNotifierProvider<HomeViewModel, HomeDashboard?> {
   /// ViewModel màn Home Dashboard.
-  /// Gom hồ sơ (TV1) + chấm công hôm nay và tổng giờ tháng (TV2) + số phép
-  /// còn (TV4) thành một [HomeDashboard]. Trả null khi chưa đăng nhập.
+  /// Gom hồ sơ (TV1) + chấm công hôm nay và tổng giờ tháng (repository của
+  /// TV2) + số phép còn (TV4) thành một [HomeDashboard]. Trả null khi chưa
+  /// đăng nhập.
   ///
   /// autoDispose: rời Home là giải phóng, quay lại sẽ tải dữ liệu mới.
   HomeViewModelProvider._()
@@ -48,11 +51,12 @@ final class HomeViewModelProvider
   HomeViewModel create() => HomeViewModel();
 }
 
-String _$homeViewModelHash() => r'cf140147158d7ae10a1faba5684d2645f35482ef';
+String _$homeViewModelHash() => r'2e0cbb5eb2e4071048d25af188a7c602dee3ed21';
 
 /// ViewModel màn Home Dashboard.
-/// Gom hồ sơ (TV1) + chấm công hôm nay và tổng giờ tháng (TV2) + số phép
-/// còn (TV4) thành một [HomeDashboard]. Trả null khi chưa đăng nhập.
+/// Gom hồ sơ (TV1) + chấm công hôm nay và tổng giờ tháng (repository của
+/// TV2) + số phép còn (TV4) thành một [HomeDashboard]. Trả null khi chưa
+/// đăng nhập.
 ///
 /// autoDispose: rời Home là giải phóng, quay lại sẽ tải dữ liệu mới.
 

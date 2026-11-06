@@ -8,25 +8,24 @@ part of 'attendance_repository.dart';
 
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // ignore_for_file: type=lint, type=warning
-/// Provider trả về interface. Test override bằng bản mock:
-/// `attendanceRepositoryProvider.overrideWithValue(MockAttendanceRepository())`.
+/// Repository chấm công dùng cho cả app.
 
 @ProviderFor(attendanceRepository)
 final attendanceRepositoryProvider = AttendanceRepositoryProvider._();
 
-/// Provider trả về interface. Test override bằng bản mock:
-/// `attendanceRepositoryProvider.overrideWithValue(MockAttendanceRepository())`.
+/// Repository chấm công dùng cho cả app.
 
 final class AttendanceRepositoryProvider
     extends
         $FunctionalProvider<
+          AsyncValue<AttendanceRepository>,
           AttendanceRepository,
-          AttendanceRepository,
-          AttendanceRepository
+          FutureOr<AttendanceRepository>
         >
-    with $Provider<AttendanceRepository> {
-  /// Provider trả về interface. Test override bằng bản mock:
-  /// `attendanceRepositoryProvider.overrideWithValue(MockAttendanceRepository())`.
+    with
+        $FutureModifier<AttendanceRepository>,
+        $FutureProvider<AttendanceRepository> {
+  /// Repository chấm công dùng cho cả app.
   AttendanceRepositoryProvider._()
     : super(
         from: null,
@@ -43,23 +42,15 @@ final class AttendanceRepositoryProvider
 
   @$internal
   @override
-  $ProviderElement<AttendanceRepository> $createElement(
+  $FutureProviderElement<AttendanceRepository> $createElement(
     $ProviderPointer pointer,
-  ) => $ProviderElement(pointer);
+  ) => $FutureProviderElement(pointer);
 
   @override
-  AttendanceRepository create(Ref ref) {
+  FutureOr<AttendanceRepository> create(Ref ref) {
     return attendanceRepository(ref);
-  }
-
-  /// {@macro riverpod.override_with_value}
-  Override overrideWithValue(AttendanceRepository value) {
-    return $ProviderOverride(
-      origin: this,
-      providerOverride: $SyncValueProvider<AttendanceRepository>(value),
-    );
   }
 }
 
 String _$attendanceRepositoryHash() =>
-    r'ad37bcf194c70db60f12a06452edefa79c9a083e';
+    r'cc42ac042745b47401a91bf288a601b32105a5b5';

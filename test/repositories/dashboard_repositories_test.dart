@@ -3,16 +3,17 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:timekeeper/core/utils/date_utils.dart';
 import 'package:timekeeper/models/profile.dart';
-import 'package:timekeeper/models/today_attendance.dart';
-import 'package:timekeeper/repositories/attendance_repository.dart';
+import 'package:timekeeper/models/attendance_record.dart';
+import 'package:timekeeper/models/monthly_summary.dart';
 import 'package:timekeeper/repositories/leave_repository.dart';
 
 void main() {
-  group('SupabaseAttendanceRepository.summarize', () {
+  group('MonthlySummary.fromRecords', () {
     test('cộng giờ, đếm ngày công và ngày trễ', () {
       final records = [
-        TodayAttendance.fromJson(const {
+        AttendanceRecord.fromMap(const {
           'id': '1',
+          'employee_id': 'e1',
           'work_date': '2026-11-02',
           'check_in_at': '2026-11-02T01:00:00Z',
           'check_out_at': '2026-11-02T10:00:00Z',
@@ -20,8 +21,9 @@ void main() {
           'late_minutes': 0,
           'status': 'present',
         }),
-        TodayAttendance.fromJson(const {
+        AttendanceRecord.fromMap(const {
           'id': '2',
+          'employee_id': 'e1',
           'work_date': '2026-11-03',
           'check_in_at': '2026-11-03T01:20:00Z',
           'check_out_at': '2026-11-03T10:00:00Z',
@@ -30,14 +32,15 @@ void main() {
           'status': 'late',
         }),
         // Ngày vắng: không check-in, không tính ngày công.
-        TodayAttendance.fromJson(const {
+        AttendanceRecord.fromMap(const {
           'id': '3',
+          'employee_id': 'e1',
           'work_date': '2026-11-04',
           'status': 'absent',
         }),
       ];
 
-      final s = SupabaseAttendanceRepository.summarize(records);
+      final s = MonthlySummary.fromRecords(records);
 
       expect(s.totalHours, 15.5);
       expect(s.workDays, 2);
@@ -45,7 +48,7 @@ void main() {
     });
 
     test('danh sách rỗng -> tất cả bằng 0', () {
-      final s = SupabaseAttendanceRepository.summarize(const []);
+      final s = MonthlySummary.fromRecords(const []);
       expect(s.totalHours, 0);
       expect(s.workDays, 0);
       expect(s.lateDays, 0);

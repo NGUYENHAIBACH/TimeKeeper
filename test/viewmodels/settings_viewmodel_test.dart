@@ -7,11 +7,11 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:timekeeper/core/providers/core_providers.dart';
 import 'package:timekeeper/models/app_settings.dart';
-import 'package:timekeeper/repositories/biometric_repository.dart';
+import 'package:timekeeper/core/services/biometric_service.dart';
 import 'package:timekeeper/viewmodels/settings/settings_viewmodel.dart';
 
-/// Vân tay giả: điều khiển được kết quả isAvailable / authenticate.
-class _FakeBiometric implements BiometricRepository {
+/// Vân tay giả (thay BiometricService của TV2): điều khiển được kết quả.
+class _FakeBiometric implements BiometricService {
   _FakeBiometric({this.available = true, this.authOk = true});
   final bool available;
   final bool authOk;
@@ -20,19 +20,22 @@ class _FakeBiometric implements BiometricRepository {
   Future<bool> isAvailable() async => available;
 
   @override
-  Future<bool> authenticate({String reason = ''}) async => authOk;
+  Future<BiometricResult> authenticate(String reason) async {
+    if (!available) return BiometricResult.notAvailable;
+    return authOk ? BiometricResult.success : BiometricResult.failed;
+  }
 }
 
 Future<(ProviderContainer, SharedPreferences)> _setup({
   Map<String, Object> initial = const {},
-  BiometricRepository? biometric,
+  BiometricService? biometric,
 }) async {
   SharedPreferences.setMockInitialValues(initial);
   final prefs = await SharedPreferences.getInstance();
   final container = ProviderContainer(
     overrides: [
       sharedPrefsProvider.overrideWithValue(prefs),
-      biometricRepositoryProvider.overrideWithValue(biometric ?? _FakeBiometric()),
+      biometricServiceProvider.overrideWithValue(biometric ?? _FakeBiometric()),
     ],
   );
   addTearDown(container.dispose);

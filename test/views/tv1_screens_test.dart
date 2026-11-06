@@ -52,8 +52,10 @@ void main() {
         overrides: [
           profileViewModelProvider
               .overrideWith(() => FakeProfileViewModel(testProfile)),
-          attendanceRepositoryProvider
-              .overrideWithValue(attendance ?? MockAttendanceRepository()),
+          attendanceRepositoryProvider.overrideWith(
+            (ref) async =>
+                attendance ?? MockAttendanceRepository(monthRecords: sampleMonthRecords),
+          ),
           leaveRepositoryProvider.overrideWithValue(leave ?? MockLeaveRepository()),
         ],
         child: const MaterialApp(home: HomeScreen()),
@@ -68,7 +70,7 @@ void main() {
       expect(find.text('Xin chào, Nguyen Van A'), findsOneWidget);
       expect(find.text('Chưa chấm công'), findsOneWidget);
       expect(find.text('Check-in ngay'), findsOneWidget);
-      expect(find.text('96.5 h'), findsOneWidget);
+      expect(find.text('15.5 h'), findsOneWidget);
       expect(find.text('8.5 ngày'), findsOneWidget);
       // Nhân viên thường không thấy lối tắt Duyệt đơn.
       expect(find.text('Duyệt đơn'), findsNothing);

@@ -2,6 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
+import 'package:timekeeper/views/attendance/attendance_calendar_screen.dart';
+import 'package:timekeeper/views/attendance/check_in_screen.dart';
+import 'package:timekeeper/views/attendance/correction_form_screen.dart';
+import 'package:timekeeper/views/attendance/day_detail_screen.dart';
 import 'package:timekeeper/views/auth/forgot_password_screen.dart';
 import 'package:timekeeper/views/auth/login_screen.dart';
 import 'package:timekeeper/views/auth/register_screen.dart';
@@ -14,6 +18,13 @@ import 'package:timekeeper/core/widgets/placeholder_screen.dart';
 import 'app_routes.dart';
 
 part 'app_router.g.dart';
+
+/// Đọc `?date=yyyy-MM-dd` (TV2). Sai định dạng hoặc thiếu thì lấy hôm nay.
+DateTime _dateParam(GoRouterState state) {
+  final parsed = DateTime.tryParse(state.uri.queryParameters['date'] ?? '');
+  final d = parsed ?? DateTime.now();
+  return DateTime(d.year, d.month, d.day);
+}
 
 /// GoRouter của toàn app. keepAlive vì chỉ tạo một lần.
 ///
@@ -89,15 +100,19 @@ GoRouter router(Ref ref) {
       // ----- TV2: Chấm công -----
       GoRoute(
         path: AppRoutes.checkin,
-        builder: (_, _) => const PlaceholderScreen(title: 'Check-in / Check-out', owner: 'TV2'),
+        builder: (_, _) => const CheckInScreen(),
       ),
       GoRoute(
         path: AppRoutes.attendanceCalendar,
-        builder: (_, _) => const PlaceholderScreen(title: 'Lịch công tháng', owner: 'TV2'),
+        builder: (_, _) => const AttendanceCalendarScreen(),
       ),
       GoRoute(
         path: AppRoutes.attendanceDay,
-        builder: (_, _) => const PlaceholderScreen(title: 'Chi tiết ngày công', owner: 'TV2'),
+        builder: (_, state) => DayDetailScreen(day: _dateParam(state)),
+      ),
+      GoRoute(
+        path: AppRoutes.attendanceCorrection,
+        builder: (_, state) => CorrectionFormScreen(day: _dateParam(state)),
       ),
 
       // ----- TV3: OT + Báo cáo -----

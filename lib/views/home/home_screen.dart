@@ -7,7 +7,7 @@ import 'package:timekeeper/core/widgets/error_view.dart';
 import 'package:timekeeper/core/widgets/loading_view.dart';
 import 'package:timekeeper/models/home_dashboard.dart';
 import 'package:timekeeper/models/profile.dart';
-import 'package:timekeeper/models/today_attendance.dart';
+import 'package:timekeeper/models/attendance_record.dart';
 import 'package:timekeeper/viewmodels/home/home_viewmodel.dart';
 
 /// Home Dashboard: trạng thái chấm công hôm nay, tổng giờ tháng, số phép
@@ -201,12 +201,13 @@ class _GreetingCard extends StatelessWidget {
 }
 
 /// Thẻ trạng thái chấm công hôm nay + nút check-in / check-out nhanh.
-class _TodayCard extends StatelessWidget {
+/// Dữ liệu là bản ghi [AttendanceRecord] của module chấm công (TV2).
+class _TodayCard extends ConsumerWidget {
   const _TodayCard({required this.today});
-  final TodayAttendance? today;
+  final AttendanceRecord? today;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final scheme = Theme.of(context).colorScheme;
     final text = Theme.of(context).textTheme;
 
@@ -223,7 +224,7 @@ class _TodayCard extends StatelessWidget {
       buttonLabel = 'Check-in ngay';
       icon = Icons.login;
       color = scheme.error;
-    } else if (t.isWorking) {
+    } else if (!t.hasCheckedOut) {
       title = 'Đang làm việc';
       subtitle = 'Check-in lúc ${AppDateUtils.toHourMinute(t.checkInAt!)}'
           '${t.lateMinutes > 0 ? ' · trễ ${t.lateMinutes} phút' : ''}';
@@ -264,7 +265,12 @@ class _TodayCard extends StatelessWidget {
             ),
             const SizedBox(height: 12),
             FilledButton.icon(
-              onPressed: () => context.push(AppRoutes.checkin),
+              // Mở màn chấm công của TV2; khi quay lại thì tải lại Dashboard
+              // để thẻ này và các số liệu tháng phản ánh lần chấm vừa xong.
+              onPressed: () async {
+                await context.push(AppRoutes.checkin);
+                if (context.mounted) ref.invalidate(homeViewModelProvider);
+              },
               icon: Icon(icon),
               label: Text(buttonLabel),
             ),

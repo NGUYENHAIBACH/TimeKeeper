@@ -15,8 +15,8 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$HomeDashboard {
 
- Profile get profile;/// Null = hôm nay chưa chấm công.
- TodayAttendance? get today; MonthlySummary get summary; LeaveBalanceSummary get leave;
+ Profile get profile;/// Bản ghi chấm công hôm nay (model của TV2). Null = chưa chấm công.
+ AttendanceRecord? get today; MonthlySummary get summary; LeaveBalanceSummary get leave;
 /// Create a copy of HomeDashboard
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -52,11 +52,11 @@ abstract mixin class $HomeDashboardCopyWith<$Res>  {
   factory $HomeDashboardCopyWith(HomeDashboard value, $Res Function(HomeDashboard) _then) = _$HomeDashboardCopyWithImpl;
 @useResult
 $Res call({
- Profile profile, TodayAttendance? today, MonthlySummary summary, LeaveBalanceSummary leave
+ Profile profile, AttendanceRecord? today, MonthlySummary summary, LeaveBalanceSummary leave
 });
 
 
-$ProfileCopyWith<$Res> get profile;$TodayAttendanceCopyWith<$Res>? get today;$MonthlySummaryCopyWith<$Res> get summary;$LeaveBalanceSummaryCopyWith<$Res> get leave;
+$ProfileCopyWith<$Res> get profile;$AttendanceRecordCopyWith<$Res>? get today;$MonthlySummaryCopyWith<$Res> get summary;$LeaveBalanceSummaryCopyWith<$Res> get leave;
 
 }
 /// @nodoc
@@ -73,7 +73,7 @@ class _$HomeDashboardCopyWithImpl<$Res>
   return _then(HomeDashboard(
 profile: null == profile ? _self.profile : profile // ignore: cast_nullable_to_non_nullable
 as Profile,today: freezed == today ? _self.today : today // ignore: cast_nullable_to_non_nullable
-as TodayAttendance?,summary: null == summary ? _self.summary : summary // ignore: cast_nullable_to_non_nullable
+as AttendanceRecord?,summary: null == summary ? _self.summary : summary // ignore: cast_nullable_to_non_nullable
 as MonthlySummary,leave: null == leave ? _self.leave : leave // ignore: cast_nullable_to_non_nullable
 as LeaveBalanceSummary,
   ));
@@ -91,12 +91,12 @@ $ProfileCopyWith<$Res> get profile {
 /// with the given fields replaced by the non-null parameter values.
 @override
 @pragma('vm:prefer-inline')
-$TodayAttendanceCopyWith<$Res>? get today {
+$AttendanceRecordCopyWith<$Res>? get today {
     if (_self.today == null) {
     return null;
   }
 
-  return $TodayAttendanceCopyWith<$Res>(_self.today!, (value) {
+  return $AttendanceRecordCopyWith<$Res>(_self.today!, (value) {
     return _then(_self.copyWith(today: value));
   });
 }/// Create a copy of HomeDashboard
@@ -199,7 +199,7 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( Profile profile,  TodayAttendance? today,  MonthlySummary summary,  LeaveBalanceSummary leave)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( Profile profile,  AttendanceRecord? today,  MonthlySummary summary,  LeaveBalanceSummary leave)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _HomeDashboard() when $default != null:
 return $default(_that.profile,_that.today,_that.summary,_that.leave);case _:
@@ -220,7 +220,7 @@ return $default(_that.profile,_that.today,_that.summary,_that.leave);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( Profile profile,  TodayAttendance? today,  MonthlySummary summary,  LeaveBalanceSummary leave)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( Profile profile,  AttendanceRecord? today,  MonthlySummary summary,  LeaveBalanceSummary leave)  $default,) {final _that = this;
 switch (_that) {
 case _HomeDashboard():
 return $default(_that.profile,_that.today,_that.summary,_that.leave);case _:
@@ -240,7 +240,7 @@ return $default(_that.profile,_that.today,_that.summary,_that.leave);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( Profile profile,  TodayAttendance? today,  MonthlySummary summary,  LeaveBalanceSummary leave)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( Profile profile,  AttendanceRecord? today,  MonthlySummary summary,  LeaveBalanceSummary leave)?  $default,) {final _that = this;
 switch (_that) {
 case _HomeDashboard() when $default != null:
 return $default(_that.profile,_that.today,_that.summary,_that.leave);case _:
@@ -259,8 +259,8 @@ class _HomeDashboard implements HomeDashboard {
   
 
 @override final  Profile profile;
-/// Null = hôm nay chưa chấm công.
-@override final  TodayAttendance? today;
+/// Bản ghi chấm công hôm nay (model của TV2). Null = chưa chấm công.
+@override final  AttendanceRecord? today;
 @override final  MonthlySummary summary;
 @override final  LeaveBalanceSummary leave;
 
@@ -296,11 +296,11 @@ abstract mixin class _$HomeDashboardCopyWith<$Res> implements $HomeDashboardCopy
   factory _$HomeDashboardCopyWith(_HomeDashboard value, $Res Function(_HomeDashboard) _then) = __$HomeDashboardCopyWithImpl;
 @override @useResult
 $Res call({
- Profile profile, TodayAttendance? today, MonthlySummary summary, LeaveBalanceSummary leave
+ Profile profile, AttendanceRecord? today, MonthlySummary summary, LeaveBalanceSummary leave
 });
 
 
-@override $ProfileCopyWith<$Res> get profile;@override $TodayAttendanceCopyWith<$Res>? get today;@override $MonthlySummaryCopyWith<$Res> get summary;@override $LeaveBalanceSummaryCopyWith<$Res> get leave;
+@override $ProfileCopyWith<$Res> get profile;@override $AttendanceRecordCopyWith<$Res>? get today;@override $MonthlySummaryCopyWith<$Res> get summary;@override $LeaveBalanceSummaryCopyWith<$Res> get leave;
 
 }
 /// @nodoc
@@ -317,7 +317,7 @@ class __$HomeDashboardCopyWithImpl<$Res>
   return _then(_HomeDashboard(
 profile: null == profile ? _self.profile : profile // ignore: cast_nullable_to_non_nullable
 as Profile,today: freezed == today ? _self.today : today // ignore: cast_nullable_to_non_nullable
-as TodayAttendance?,summary: null == summary ? _self.summary : summary // ignore: cast_nullable_to_non_nullable
+as AttendanceRecord?,summary: null == summary ? _self.summary : summary // ignore: cast_nullable_to_non_nullable
 as MonthlySummary,leave: null == leave ? _self.leave : leave // ignore: cast_nullable_to_non_nullable
 as LeaveBalanceSummary,
   ));
@@ -336,12 +336,12 @@ $ProfileCopyWith<$Res> get profile {
 /// with the given fields replaced by the non-null parameter values.
 @override
 @pragma('vm:prefer-inline')
-$TodayAttendanceCopyWith<$Res>? get today {
+$AttendanceRecordCopyWith<$Res>? get today {
     if (_self.today == null) {
     return null;
   }
 
-  return $TodayAttendanceCopyWith<$Res>(_self.today!, (value) {
+  return $AttendanceRecordCopyWith<$Res>(_self.today!, (value) {
     return _then(_self.copyWith(today: value));
   });
 }/// Create a copy of HomeDashboard

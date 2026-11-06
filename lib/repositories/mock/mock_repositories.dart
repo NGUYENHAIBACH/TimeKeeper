@@ -1,6 +1,5 @@
+import 'package:timekeeper/models/attendance_record.dart';
 import 'package:timekeeper/models/leave_balance_summary.dart';
-import 'package:timekeeper/models/monthly_summary.dart';
-import 'package:timekeeper/models/today_attendance.dart';
 import 'package:timekeeper/repositories/attendance_repository.dart';
 import 'package:timekeeper/repositories/leave_repository.dart';
 
@@ -9,35 +8,42 @@ import 'package:timekeeper/repositories/leave_repository.dart';
 ///
 /// ```dart
 /// ProviderScope(overrides: [
-///   attendanceRepositoryProvider.overrideWithValue(MockAttendanceRepository()),
+///   attendanceRepositoryProvider.overrideWith((ref) async => MockAttendanceRepository()),
 ///   leaveRepositoryProvider.overrideWithValue(MockLeaveRepository()),
 /// ])
 /// ```
+///
+/// Bản giả chấm công chỉ cài 2 hàm ĐỌC mà Dashboard cần ([getRecord],
+/// [getRecordsInMonth]); gọi hàm khác của interface sẽ ném NoSuchMethodError.
 class MockAttendanceRepository implements AttendanceRepository {
-  MockAttendanceRepository({
-    this.today,
-    this.summary = const MonthlySummary(totalHours: 96.5, workDays: 12, lateDays: 1),
-    this.error,
-  });
+  MockAttendanceRepository({this.today, this.monthRecords = const [], this.error});
 
-  /// Chấm công hôm nay sẽ trả về (null = chưa check-in).
-  final TodayAttendance? today;
-  final MonthlySummary summary;
+  /// Bản ghi hôm nay sẽ trả về (null = chưa check-in).
+  final AttendanceRecord? today;
+
+  /// Các bản ghi trong tháng, dùng để tính tổng giờ / ngày công / ngày trễ.
+  final List<AttendanceRecord> monthRecords;
 
   /// Nếu khác null, mọi hàm sẽ ném lỗi này (để test nhánh error).
   final Object? error;
 
   @override
-  Future<TodayAttendance?> getTodayAttendance(String employeeId) async {
+  Future<AttendanceRecord?> getRecord(String employeeId, DateTime day) async {
     if (error != null) throw error!;
     return today;
   }
 
   @override
-  Future<MonthlySummary> getMonthlySummary(String employeeId, DateTime month) async {
+  Future<List<AttendanceRecord>> getRecordsInMonth(
+    String employeeId,
+    DateTime month,
+  ) async {
     if (error != null) throw error!;
-    return summary;
+    return monthRecords;
   }
+
+  @override
+  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }
 
 /// Repository nghỉ phép giả.
