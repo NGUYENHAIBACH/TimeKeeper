@@ -15,6 +15,7 @@ import 'package:timekeeper/views/settings/profile_screen.dart';
 import 'package:timekeeper/views/settings/settings_screen.dart';
 import 'package:timekeeper/viewmodels/auth/auth_state_provider.dart';
 import 'package:timekeeper/core/widgets/placeholder_screen.dart';
+import 'package:timekeeper/views/overtime/ot_form_screen.dart';
 import 'app_routes.dart';
 
 part 'app_router.g.dart';
@@ -122,7 +123,7 @@ GoRouter router(Ref ref) {
       ),
       GoRoute(
         path: AppRoutes.otForm,
-        builder: (_, _) => const PlaceholderScreen(title: 'Tạo đơn OT', owner: 'TV3'),
+        builder: (_, _) => const OtFormScreen(),
       ),
       GoRoute(
         path: AppRoutes.otReport,
