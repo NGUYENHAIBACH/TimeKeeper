@@ -11,6 +11,7 @@ import 'package:timekeeper/views/auth/login_screen.dart';
 import 'package:timekeeper/views/auth/register_screen.dart';
 import 'package:timekeeper/views/auth/splash_screen.dart';
 import 'package:timekeeper/views/home/home_screen.dart';
+import 'package:timekeeper/views/leave/leave_form_screen.dart';
 import 'package:timekeeper/views/leave/leave_history_screen.dart';
 import 'package:timekeeper/views/settings/profile_screen.dart';
 import 'package:timekeeper/views/settings/settings_screen.dart';
@@ -137,7 +138,7 @@ GoRouter router(Ref ref) {
       ),
       GoRoute(
         path: AppRoutes.leaveForm,
-        builder: (_, _) => const PlaceholderScreen(title: 'Xin nghỉ phép', owner: 'TV4'),
+        builder: (_, _) => const LeaveFormScreen(),
       ),
       GoRoute(
         path: AppRoutes.leaveTeamCalendar,
