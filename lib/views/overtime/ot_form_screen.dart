@@ -12,6 +12,10 @@ class OtFormScreen extends ConsumerStatefulWidget {
 class _OtFormScreenState extends ConsumerState<OtFormScreen> {
   final _formKey = GlobalKey<FormState>();
 
+  int _toMinutes(TimeOfDay time) {
+    return time.hour * 60 + time.minute;
+  }
+
   Future<void> _pickDate() async {
     final now = DateTime.now();
     final selected = await showDatePicker(
@@ -43,17 +47,43 @@ class _OtFormScreenState extends ConsumerState<OtFormScreen> {
       initialTime: const TimeOfDay(hour: 20, minute: 0),
     );
 
-    if (selected != null) {
-      ref.read(otFormViewModelProvider.notifier).setEndTime(selected);
+    if (selected == null || !mounted) return;
+
+    final form = ref.read(otFormViewModelProvider);
+    final startTime = form.startTime;
+
+    if (startTime != null &&
+        _toMinutes(selected) <= _toMinutes(startTime)) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Giờ kết thúc phải sau giờ bắt đầu'),
+        ),
+      );
+      return;
     }
+
+    ref.read(otFormViewModelProvider.notifier).setEndTime(selected);
   }
 
   void _checkInput() {
     final form = ref.read(otFormViewModelProvider);
 
-    if (form.date == null || form.startTime == null || form.endTime == null) {
+    if (form.date == null ||
+        form.startTime == null ||
+        form.endTime == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Vui lòng chọn đầy đủ ngày và giờ OT')),
+        const SnackBar(
+          content: Text('Vui lòng chọn đầy đủ ngày và giờ OT'),
+        ),
+      );
+      return;
+    }
+
+    if (_toMinutes(form.endTime!) <= _toMinutes(form.startTime!)) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Giờ kết thúc phải sau giờ bắt đầu'),
+        ),
       );
       return;
     }
