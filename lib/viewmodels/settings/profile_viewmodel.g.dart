@@ -48,7 +48,7 @@ final class ProfileViewModelProvider
   ProfileViewModel create() => ProfileViewModel();
 }
 
-String _$profileViewModelHash() => r'bf6e5e52f98a827ed570229df0d641352991b9e1';
+String _$profileViewModelHash() => r'3be46bf74626ef52bfc7719251e9b8b18827f0af';
 
 /// Hồ sơ của người đang đăng nhập. Mọi module khác lấy `employee_id`,
 /// role, phòng ban, ca làm từ đây: `ref.watch(profileViewModelProvider)`.

@@ -2,7 +2,9 @@ import 'dart:developer' as dev;
 
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/date_symbol_data_local.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -31,6 +33,9 @@ Future<void> main() async {
 
   final prefs = await SharedPreferences.getInstance();
 
+  // Tên thứ/tháng tiếng Việt cho lịch (table_calendar, intl) - TV2.
+  await initializeDateFormatting('vi_VN');
+
   runApp(
     ProviderScope(
       overrides: [sharedPrefsProvider.overrideWithValue(prefs)],
@@ -55,7 +60,10 @@ class MyApp extends ConsumerWidget {
       theme: AppTheme.light,
       darkTheme: AppTheme.dark,
       themeMode: settings.themeMode,
+      // Ngôn ngữ của widget hệ thống (date/time picker, dialog...).
       locale: Locale(settings.locale),
+      supportedLocales: const [Locale('vi'), Locale('en')],
+      localizationsDelegates: GlobalMaterialLocalizations.delegates,
       routerConfig: router,
     );
   }

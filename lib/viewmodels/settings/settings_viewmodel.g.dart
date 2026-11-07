@@ -53,7 +53,7 @@ final class SettingsViewModelProvider
   }
 }
 
-String _$settingsViewModelHash() => r'9a44c8a6faf8bcf03003e93a5664fad18083a148';
+String _$settingsViewModelHash() => r'b230c10f0e55b64eb5d085780564daee7d7d0610';
 
 /// ViewModel cấu hình app (theme, ngôn ngữ, giờ nhắc, vân tay).
 /// keepAlive vì `MyApp` watch nó để đổi theme, và TV4 đọc giờ nhắc.

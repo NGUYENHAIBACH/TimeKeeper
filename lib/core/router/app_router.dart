@@ -2,16 +2,29 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
+import 'package:timekeeper/views/attendance/attendance_calendar_screen.dart';
+import 'package:timekeeper/views/attendance/check_in_screen.dart';
+import 'package:timekeeper/views/attendance/correction_form_screen.dart';
+import 'package:timekeeper/views/attendance/day_detail_screen.dart';
 import 'package:timekeeper/views/auth/forgot_password_screen.dart';
 import 'package:timekeeper/views/auth/login_screen.dart';
 import 'package:timekeeper/views/auth/register_screen.dart';
 import 'package:timekeeper/views/auth/splash_screen.dart';
 import 'package:timekeeper/views/home/home_screen.dart';
+import 'package:timekeeper/views/settings/profile_screen.dart';
+import 'package:timekeeper/views/settings/settings_screen.dart';
 import 'package:timekeeper/viewmodels/auth/auth_state_provider.dart';
 import 'package:timekeeper/core/widgets/placeholder_screen.dart';
 import 'app_routes.dart';
 
 part 'app_router.g.dart';
+
+/// Đọc `?date=yyyy-MM-dd` (TV2). Sai định dạng hoặc thiếu thì lấy hôm nay.
+DateTime _dateParam(GoRouterState state) {
+  final parsed = DateTime.tryParse(state.uri.queryParameters['date'] ?? '');
+  final d = parsed ?? DateTime.now();
+  return DateTime(d.year, d.month, d.day);
+}
 
 /// GoRouter của toàn app. keepAlive vì chỉ tạo một lần.
 ///
@@ -20,15 +33,24 @@ part 'app_router.g.dart';
 /// - Chưa đăng nhập mà vào route private  -> Login
 /// - Đã đăng nhập mà vào Login/Register   -> Home
 ///
+/// Chỉ có MỘT GoRouter suốt vòng đời app. Khi `authState` đổi ta không tạo
+/// router mới (sẽ mất ngăn xếp màn hình) mà báo router chạy lại `redirect`
+/// thông qua `refreshListenable`.
+///
 /// Mỗi thành viên thay `PlaceholderScreen` của route mình bằng screen thật.
 @Riverpod(keepAlive: true)
 GoRouter router(Ref ref) {
-  final auth = ref.watch(authStateProvider);
+  final refresh = ValueNotifier<int>(0);
+  ref.listen(authStateProvider, (_, _) => refresh.value++);
+  ref.onDispose(refresh.dispose);
 
-  return GoRouter(
+  final router = GoRouter(
     initialLocation: AppRoutes.splash,
     debugLogDiagnostics: true,
+    refreshListenable: refresh,
     redirect: (context, state) {
+      // Đọc giá trị mới nhất tại thời điểm redirect chạy.
+      final auth = ref.read(authStateProvider);
       final location = state.matchedLocation;
       final isPublic = AppRoutes.publicRoutes.contains(location);
 
@@ -68,25 +90,29 @@ GoRouter router(Ref ref) {
       ),
       GoRoute(
         path: AppRoutes.profile,
-        builder: (_, _) => const PlaceholderScreen(title: 'Hồ sơ', owner: 'TV1'),
+        builder: (_, _) => const ProfileScreen(),
       ),
       GoRoute(
         path: AppRoutes.settings,
-        builder: (_, _) => const PlaceholderScreen(title: 'Cài đặt', owner: 'TV1'),
+        builder: (_, _) => const SettingsScreen(),
       ),
 
       // ----- TV2: Chấm công -----
       GoRoute(
         path: AppRoutes.checkin,
-        builder: (_, _) => const PlaceholderScreen(title: 'Check-in / Check-out', owner: 'TV2'),
+        builder: (_, _) => const CheckInScreen(),
       ),
       GoRoute(
         path: AppRoutes.attendanceCalendar,
-        builder: (_, _) => const PlaceholderScreen(title: 'Lịch công tháng', owner: 'TV2'),
+        builder: (_, _) => const AttendanceCalendarScreen(),
       ),
       GoRoute(
         path: AppRoutes.attendanceDay,
-        builder: (_, _) => const PlaceholderScreen(title: 'Chi tiết ngày công', owner: 'TV2'),
+        builder: (_, state) => DayDetailScreen(day: _dateParam(state)),
+      ),
+      GoRoute(
+        path: AppRoutes.attendanceCorrection,
+        builder: (_, state) => CorrectionFormScreen(day: _dateParam(state)),
       ),
 
       // ----- TV3: OT + Báo cáo -----
@@ -136,4 +162,6 @@ GoRouter router(Ref ref) {
       body: Center(child: Text('Không có route: ${state.uri}')),
     ),
   );
+  ref.onDispose(router.dispose);
+  return router;
 }
