@@ -69,7 +69,9 @@ class AuthRepository {
     try {
       final google = GoogleSignIn.instance;
       if (!_googleInitialized) {
-        await google.initialize(serverClientId: FirebaseConstants.googleWebClientId);
+        await google.initialize(
+          serverClientId: FirebaseConstants.googleWebClientId,
+        );
         _googleInitialized = true;
       }
       final account = await google.authenticate();
@@ -84,7 +86,9 @@ class AuthRepository {
       if (e.code == GoogleSignInExceptionCode.canceled) {
         throw const AuthException('Bạn đã hủy đăng nhập Google');
       }
-      throw AuthException('Đăng nhập Google thất bại: ${e.description ?? e.code.name}');
+      throw AuthException(
+        'Đăng nhập Google thất bại: ${e.description ?? e.code.name}',
+      );
     } on FirebaseAuthException catch (e) {
       throw AuthException(_translate(e));
     }
@@ -101,10 +105,13 @@ class AuthRepository {
 
   /// Đăng xuất cả Firebase lẫn Google (để lần sau chọn lại tài khoản).
   Future<void> signOut() async {
-    if (_googleInitialized) {
-      await GoogleSignIn.instance.signOut();
+    try {
+      if (_googleInitialized) {
+        await GoogleSignIn.instance.signOut();
+      }
+    } finally {
+      await _auth.signOut();
     }
-    await _auth.signOut();
   }
 
   /// Dịch mã lỗi Firebase sang tiếng Việt.

@@ -18,6 +18,11 @@ import 'package:timekeeper/views/settings/profile_screen.dart';
 import 'package:timekeeper/views/settings/settings_screen.dart';
 import 'package:timekeeper/viewmodels/auth/auth_state_provider.dart';
 import 'package:timekeeper/core/widgets/placeholder_screen.dart';
+import 'package:timekeeper/views/overtime/ot_form_screen.dart';
+import 'package:timekeeper/views/overtime/ot_list_screen.dart';
+import 'package:timekeeper/views/overtime/ot_report_screen.dart';
+import 'package:timekeeper/features/approval/approval_screens.dart';
+
 import 'app_routes.dart';
 
 part 'app_router.g.dart';
@@ -48,11 +53,10 @@ GoRouter router(Ref ref) {
   ref.onDispose(refresh.dispose);
 
   final router = GoRouter(
+    refreshListenable: refresh,
     initialLocation: AppRoutes.splash,
     debugLogDiagnostics: true,
-    refreshListenable: refresh,
     redirect: (context, state) {
-      // Đọc giá trị mới nhất tại thời điểm redirect chạy.
       final auth = ref.read(authStateProvider);
       final location = state.matchedLocation;
       final isPublic = AppRoutes.publicRoutes.contains(location);
@@ -64,21 +68,17 @@ GoRouter router(Ref ref) {
 
       final loggedIn = auth.value != null;
       if (!loggedIn) {
-        return isPublic && location != AppRoutes.splash ? null : AppRoutes.login;
+        return isPublic && location != AppRoutes.splash
+            ? null
+            : AppRoutes.login;
       }
       // Đã đăng nhập: không cho quay lại các màn auth.
       return isPublic ? AppRoutes.home : null;
     },
     routes: [
       // ----- TV1 -----
-      GoRoute(
-        path: AppRoutes.splash,
-        builder: (_, _) => const SplashScreen(),
-      ),
-      GoRoute(
-        path: AppRoutes.login,
-        builder: (_, _) => const LoginScreen(),
-      ),
+      GoRoute(path: AppRoutes.splash, builder: (_, _) => const SplashScreen()),
+      GoRoute(path: AppRoutes.login, builder: (_, _) => const LoginScreen()),
       GoRoute(
         path: AppRoutes.register,
         builder: (_, _) => const RegisterScreen(),
@@ -87,10 +87,7 @@ GoRouter router(Ref ref) {
         path: AppRoutes.forgotPassword,
         builder: (_, _) => const ForgotPasswordScreen(),
       ),
-      GoRoute(
-        path: AppRoutes.home,
-        builder: (_, _) => const HomeScreen(),
-      ),
+      GoRoute(path: AppRoutes.home, builder: (_, _) => const HomeScreen()),
       GoRoute(
         path: AppRoutes.profile,
         builder: (_, _) => const ProfileScreen(),
@@ -121,15 +118,15 @@ GoRouter router(Ref ref) {
       // ----- TV3: OT + Báo cáo -----
       GoRoute(
         path: AppRoutes.otList,
-        builder: (_, _) => const PlaceholderScreen(title: 'Danh sách đơn OT', owner: 'TV3'),
+        builder: (_, _) => const OtListScreen(),
       ),
       GoRoute(
         path: AppRoutes.otForm,
-        builder: (_, _) => const PlaceholderScreen(title: 'Tạo đơn OT', owner: 'TV3'),
+        builder: (_, _) => const OtFormScreen(),
       ),
       GoRoute(
         path: AppRoutes.otReport,
-        builder: (_, _) => const PlaceholderScreen(title: 'Thống kê OT', owner: 'TV3'),
+        builder: (_, _) => const OtReportScreen(),
       ),
 
       // ----- TV4: Nghỉ phép -----
@@ -149,15 +146,15 @@ GoRouter router(Ref ref) {
       // ----- TV5: Duyệt đơn & Thông báo -----
       GoRoute(
         path: AppRoutes.approvalInbox,
-        builder: (_, _) => const PlaceholderScreen(title: 'Hộp duyệt đơn', owner: 'TV5'),
+        builder: (_, _) => const ApprovalInboxScreen(),
       ),
       GoRoute(
         path: AppRoutes.notifications,
-        builder: (_, _) => const PlaceholderScreen(title: 'Thông báo', owner: 'TV5'),
+        builder: (_, _) => const NotificationCenterScreen(),
       ),
       GoRoute(
         path: AppRoutes.teamDashboard,
-        builder: (_, _) => const PlaceholderScreen(title: 'Team Dashboard', owner: 'TV5'),
+        builder: (_, _) => const TeamDashboardScreen(),
       ),
     ],
     errorBuilder: (context, state) => Scaffold(

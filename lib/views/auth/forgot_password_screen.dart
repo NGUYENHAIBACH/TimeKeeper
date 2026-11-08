@@ -12,7 +12,8 @@ class ForgotPasswordScreen extends ConsumerStatefulWidget {
   const ForgotPasswordScreen({super.key});
 
   @override
-  ConsumerState<ForgotPasswordScreen> createState() => _ForgotPasswordScreenState();
+  ConsumerState<ForgotPasswordScreen> createState() =>
+      _ForgotPasswordScreenState();
 }
 
 class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
@@ -28,8 +29,9 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
 
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
-    final ok =
-        await ref.read(authViewModelProvider.notifier).sendResetEmail(_email.text);
+    final ok = await ref
+        .read(authViewModelProvider.notifier)
+        .sendResetEmail(_email.text);
     if (ok && mounted) setState(() => _sent = true);
   }
 
@@ -46,7 +48,7 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
 
     return Scaffold(
       appBar: AppBar(title: const Text('Quên mật khẩu')),
-      body: Padding(
+      body: SingleChildScrollView(
         padding: const EdgeInsets.all(24),
         child: _sent
             ? _SentView(email: _email.text)
@@ -69,7 +71,11 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
                       enabled: !loading,
                     ),
                     const SizedBox(height: 24),
-                    AppButton(label: 'Gửi email', onPressed: _submit, loading: loading),
+                    AppButton(
+                      label: 'Gửi email',
+                      onPressed: _submit,
+                      loading: loading,
+                    ),
                   ],
                 ),
               ),
@@ -88,13 +94,18 @@ class _SentView extends StatelessWidget {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        Icon(Icons.mark_email_read_outlined,
-            size: 64, color: Theme.of(context).colorScheme.primary),
+        Icon(
+          Icons.mark_email_read_outlined,
+          size: 64,
+          color: Theme.of(context).colorScheme.primary,
+        ),
         const SizedBox(height: 16),
         Text('Đã gửi email tới $email', textAlign: TextAlign.center),
         const SizedBox(height: 8),
-        const Text('Kiểm tra hộp thư (kể cả mục Spam) và làm theo hướng dẫn.',
-            textAlign: TextAlign.center),
+        const Text(
+          'Kiểm tra hộp thư (kể cả mục Spam) và làm theo hướng dẫn.',
+          textAlign: TextAlign.center,
+        ),
         const SizedBox(height: 24),
         AppButton(
           label: 'Quay lại đăng nhập',
