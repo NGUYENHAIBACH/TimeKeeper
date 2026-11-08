@@ -92,6 +92,11 @@ class ApprovalRepository {
   Future<List<Map<String, dynamic>>> inbox(Profile actor) async {
     final ids = await team(actor);
     if (ids.isEmpty) return [];
+    final profileRows = await client
+        .from('profiles')
+        .select('id, full_name, email')
+        .inFilter('id', ids);
+    final profiles = {for (final row in profileRows) row['id'] as String: row};
     final result = <Map<String, dynamic>>[];
     for (final table in tables) {
       final rows = await client
@@ -100,7 +105,17 @@ class ApprovalRepository {
           .inFilter('employee_id', ids)
           .eq('status', 'pending')
           .order('created_at');
-      result.addAll(rows.map((row) => {...row, 'table': table}));
+      result.addAll(
+        rows.map((row) {
+          final employee = profiles[row['employee_id']];
+          return {
+            ...row,
+            'table': table,
+            'employee_name': employee?['full_name'],
+            'employee_email': employee?['email'],
+          };
+        }),
+      );
     }
     result.sort(
       (a, b) =>
