@@ -6,13 +6,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:timekeeper/core/router/app_router.dart';
 import 'package:timekeeper/core/router/app_routes.dart';
-import 'package:timekeeper/data/models/profile.dart';
-import 'package:timekeeper/data/repositories/auth_repository.dart';
-import 'package:timekeeper/data/repositories/profile_repository.dart';
-import 'package:timekeeper/features/auth/view/forgot_password_screen.dart';
-import 'package:timekeeper/features/auth/view/login_screen.dart';
-import 'package:timekeeper/features/auth/viewmodel/auth_state_provider.dart';
-import 'package:timekeeper/features/auth/viewmodel/auth_viewmodel.dart';
+import 'package:timekeeper/models/profile.dart';
+import 'package:timekeeper/repositories/auth_repository.dart';
+import 'package:timekeeper/repositories/profile_repository.dart';
+import 'package:timekeeper/viewmodels/auth/auth_state_provider.dart';
+import 'package:timekeeper/viewmodels/auth/auth_viewmodel.dart';
+import 'package:timekeeper/views/auth/forgot_password_screen.dart';
+import 'package:timekeeper/views/auth/login_screen.dart';
 
 class _User extends Fake implements User {}
 
@@ -98,9 +98,13 @@ void main() {
     tester,
   ) async {
     final auth = _AuthRepository();
+    final profile = _ProfileRepository();
     await tester.pumpWidget(
       ProviderScope(
-        overrides: [authRepositoryProvider.overrideWithValue(auth)],
+        overrides: [
+          authRepositoryProvider.overrideWithValue(auth),
+          profileRepositoryProvider.overrideWithValue(profile),
+        ],
         child: const MaterialApp(home: LoginScreen()),
       ),
     );
