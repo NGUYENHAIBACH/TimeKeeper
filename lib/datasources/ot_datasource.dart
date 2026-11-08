@@ -1,0 +1,27 @@
+import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:timekeeper/core/providers/core_providers.dart';
+
+part 'ot_datasource.g.dart';
+
+class OtDataSource {
+  OtDataSource(this._client);
+
+  final SupabaseClient _client;
+
+  Future<List<DateTime>> getHolidays() async {
+    final rows = await _client
+        .from('holidays')
+        .select('holiday_date')
+        .order('holiday_date');
+
+    return rows.map((row) {
+      return DateTime.parse(row['holiday_date'] as String);
+    }).toList();
+  }
+}
+
+@Riverpod(keepAlive: true)
+OtDataSource otDataSource(Ref ref) {
+  return OtDataSource(ref.watch(supabaseProvider));
+}
