@@ -42,6 +42,19 @@ class OtDataSource {
     });
   }
 
+  Future<List<Map<String, dynamic>>> getRequestsByEmployee(
+    String employeeId,
+  ) async {
+    final rows = await _client
+        .from('ot_requests')
+        .select()
+        .eq('employee_id', employeeId)
+        .order('ot_date', ascending: false)
+        .order('created_at', ascending: false);
+
+    return rows.cast<Map<String, dynamic>>();
+  }
+
   String _formatDate(DateTime value) {
     final month = value.month.toString().padLeft(2, '0');
     final day = value.day.toString().padLeft(2, '0');

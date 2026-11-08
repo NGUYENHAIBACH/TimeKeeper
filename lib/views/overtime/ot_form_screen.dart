@@ -96,8 +96,7 @@ class _OtFormScreenState extends ConsumerState<OtFormScreen> {
 
       if (!mounted) return;
 
-      ScaffoldMessenger.of(context)
-          .showSnackBar(const SnackBar(content: Text('Gửi đơn OT thành công')));
+      Navigator.pop(context, true);
     } catch (error) {
       if (!mounted) return;
 

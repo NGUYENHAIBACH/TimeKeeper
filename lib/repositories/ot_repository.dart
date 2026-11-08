@@ -1,5 +1,6 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:timekeeper/datasources/ot_datasource.dart';
+import 'package:timekeeper/models/ot_request.dart';
 
 part 'ot_repository.g.dart';
 
@@ -30,6 +31,11 @@ class OtRepository {
       multiplier: multiplier,
       reason: reason,
     );
+  }
+
+  Future<List<OtRequest>> getMyRequests(String employeeId) async {
+    final rows = await _dataSource.getRequestsByEmployee(employeeId);
+    return rows.map(OtRequest.fromJson).toList();
   }
 }
 

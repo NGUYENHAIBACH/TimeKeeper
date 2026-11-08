@@ -130,7 +130,7 @@ class _DashboardBody extends StatelessWidget {
             const _ShortcutCard(
               icon: Icons.more_time,
               label: 'Tăng ca',
-              route: AppRoutes.otForm,
+              route: AppRoutes.otList,
             ),
             const _ShortcutCard(
               icon: Icons.event_busy,
