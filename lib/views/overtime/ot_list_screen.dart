@@ -106,60 +106,78 @@ class _Filters extends ConsumerWidget {
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
-      child: Row(
-        children: [
-          Expanded(
-            child: DropdownButtonFormField<String>(
-              initialValue: selectedKey,
-              decoration: const InputDecoration(
-                labelText: 'Tháng',
-                prefixIcon: Icon(Icons.calendar_month),
-              ),
-              items: [
-                const DropdownMenuItem(
-                  value: 'all',
-                  child: Text('Tất cả tháng'),
-                ),
-                for (final key in monthKeys)
-                  DropdownMenuItem(value: key, child: Text(_monthLabel(key))),
-              ],
-              onChanged: (value) {
-                if (value == null || value == 'all') {
-                  ref.read(otListViewModelProvider.notifier).setMonth(null);
-                  return;
-                }
-                final parts = value.split('-');
-                ref
-                    .read(otListViewModelProvider.notifier)
-                    .setMonth(
-                      DateTime(int.parse(parts[0]), int.parse(parts[1])),
-                    );
-              },
-            ),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: DropdownButtonFormField<String>(
-              initialValue: state.selectedStatus,
-              decoration: const InputDecoration(
-                labelText: 'Trạng thái',
-                prefixIcon: Icon(Icons.filter_alt_outlined),
-              ),
-              items: [
-                for (final status in otStatuses)
-                  DropdownMenuItem(
-                    value: status,
-                    child: Text(_statusLabel(status)),
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          const spacing = 12.0;
+          final isNarrow = constraints.maxWidth < 480;
+          final fieldWidth = isNarrow
+              ? constraints.maxWidth
+              : (constraints.maxWidth - spacing) / 2;
+
+          return Wrap(
+            spacing: spacing,
+            runSpacing: spacing,
+            children: [
+              SizedBox(
+                width: fieldWidth,
+                child: DropdownButtonFormField<String>(
+                  initialValue: selectedKey,
+                  decoration: const InputDecoration(
+                    labelText: 'Tháng',
+                    prefixIcon: Icon(Icons.calendar_month),
                   ),
-              ],
-              onChanged: (value) {
-                if (value != null) {
-                  ref.read(otListViewModelProvider.notifier).setStatus(value);
-                }
-              },
-            ),
-          ),
-        ],
+                  items: [
+                    const DropdownMenuItem(
+                      value: 'all',
+                      child: Text('Tất cả tháng'),
+                    ),
+                    for (final key in monthKeys)
+                      DropdownMenuItem(
+                        value: key,
+                        child: Text(_monthLabel(key)),
+                      ),
+                  ],
+                  onChanged: (value) {
+                    if (value == null || value == 'all') {
+                      ref.read(otListViewModelProvider.notifier).setMonth(null);
+                      return;
+                    }
+                    final parts = value.split('-');
+                    ref
+                        .read(otListViewModelProvider.notifier)
+                        .setMonth(
+                          DateTime(int.parse(parts[0]), int.parse(parts[1])),
+                        );
+                  },
+                ),
+              ),
+              SizedBox(
+                width: fieldWidth,
+                child: DropdownButtonFormField<String>(
+                  initialValue: state.selectedStatus,
+                  decoration: const InputDecoration(
+                    labelText: 'Trạng thái',
+                    prefixIcon: Icon(Icons.filter_alt_outlined),
+                  ),
+                  items: [
+                    for (final status in otStatuses)
+                      DropdownMenuItem(
+                        value: status,
+                        child: Text(_statusLabel(status)),
+                      ),
+                  ],
+                  onChanged: (value) {
+                    if (value != null) {
+                      ref
+                          .read(otListViewModelProvider.notifier)
+                          .setStatus(value);
+                    }
+                  },
+                ),
+              ),
+            ],
+          );
+        },
       ),
     );
   }

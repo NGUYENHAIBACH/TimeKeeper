@@ -20,20 +20,23 @@ import '../helpers/fakes.dart';
 void main() {
   group('LoginScreen', () {
     Future<void> pumpLogin(WidgetTester tester) => tester.pumpWidget(
-          const ProviderScope(child: MaterialApp(home: LoginScreen())),
-        );
+      const ProviderScope(child: MaterialApp(home: LoginScreen())),
+    );
 
-    testWidgets('bỏ trống rồi bấm Đăng nhập -> hiện lỗi bắt buộc', (tester) async {
+    testWidgets('bỏ trống rồi bấm Đăng nhập -> hiện lỗi bắt buộc', (
+      tester,
+    ) async {
       await pumpLogin(tester);
       await tester.tap(find.widgetWithText(FilledButton, 'Đăng nhập'));
       await tester.pump();
 
       expect(find.text('Vui lòng nhập email'), findsOneWidget);
-      expect(find.text('Vui lòng nhập mật khẩu'), findsOneWidget);
+      expect(find.text('Mật khẩu không được để trống'), findsOneWidget);
     });
 
-    testWidgets('email sai định dạng và mật khẩu ngắn -> hiện lỗi tương ứng',
-        (tester) async {
+    testWidgets('email sai định dạng, mật khẩu đăng nhập ngắn vẫn hợp lệ', (
+      tester,
+    ) async {
       await pumpLogin(tester);
       await tester.enterText(find.byType(TextFormField).at(0), 'abc');
       await tester.enterText(find.byType(TextFormField).at(1), '123');
@@ -41,7 +44,7 @@ void main() {
       await tester.pump();
 
       expect(find.text('Email không đúng định dạng'), findsOneWidget);
-      expect(find.text('Mật khẩu phải có ít nhất 8 ký tự'), findsOneWidget);
+      expect(find.text('Mật khẩu phải có ít nhất 8 ký tự'), findsNothing);
     });
   });
 
@@ -50,13 +53,17 @@ void main() {
       return ProviderScope(
         retry: (_, _) => null,
         overrides: [
-          profileViewModelProvider
-              .overrideWith(() => FakeProfileViewModel(testProfile)),
+          profileViewModelProvider.overrideWith(
+            () => FakeProfileViewModel(testProfile),
+          ),
           attendanceRepositoryProvider.overrideWith(
             (ref) async =>
-                attendance ?? MockAttendanceRepository(monthRecords: sampleMonthRecords),
+                attendance ??
+                MockAttendanceRepository(monthRecords: sampleMonthRecords),
           ),
-          leaveRepositoryProvider.overrideWithValue(leave ?? MockLeaveRepository()),
+          leaveRepositoryProvider.overrideWithValue(
+            leave ?? MockLeaveRepository(),
+          ),
         ],
         child: const MaterialApp(home: HomeScreen()),
       );
@@ -78,7 +85,9 @@ void main() {
 
     testWidgets('lỗi -> hiện thông báo và nút Thử lại', (tester) async {
       await tester.pumpWidget(
-        app(attendance: MockAttendanceRepository(error: Exception('Mất kết nối'))),
+        app(
+          attendance: MockAttendanceRepository(error: Exception('Mất kết nối')),
+        ),
       );
       await tester.pumpAndSettle();
 
@@ -88,8 +97,9 @@ void main() {
   });
 
   group('SettingsScreen', () {
-    testWidgets('chọn theme Tối -> lưu theme_mode vào SharedPreferences',
-        (tester) async {
+    testWidgets('chọn theme Tối -> lưu theme_mode vào SharedPreferences', (
+      tester,
+    ) async {
       SharedPreferences.setMockInitialValues({});
       final prefs = await SharedPreferences.getInstance();
       await tester.pumpWidget(
