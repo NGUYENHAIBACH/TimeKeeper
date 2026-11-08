@@ -19,6 +19,42 @@ class OtDataSource {
       return DateTime.parse(row['holiday_date'] as String);
     }).toList();
   }
+
+  Future<void> createRequest({
+    required String employeeId,
+    required DateTime start,
+    required DateTime end,
+    required double hours,
+    required String otType,
+    required double multiplier,
+    required String reason,
+  }) async {
+    await _client.from('ot_requests').insert({
+      'employee_id': employeeId,
+      'ot_date': _formatDate(start),
+      'start_time': _formatTime(start),
+      'end_time': _formatTime(end),
+      'hours': hours,
+      'ot_type': otType,
+      'multiplier': multiplier,
+      'reason': reason.trim(),
+      'status': 'pending',
+    });
+  }
+
+  String _formatDate(DateTime value) {
+    final month = value.month.toString().padLeft(2, '0');
+    final day = value.day.toString().padLeft(2, '0');
+
+    return '${value.year}-$month-$day';
+  }
+
+  String _formatTime(DateTime value) {
+    final hour = value.hour.toString().padLeft(2, '0');
+    final minute = value.minute.toString().padLeft(2, '0');
+
+    return '$hour:$minute:00';
+  }
 }
 
 @Riverpod(keepAlive: true)

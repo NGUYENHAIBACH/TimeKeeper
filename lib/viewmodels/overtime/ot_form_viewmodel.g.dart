@@ -33,7 +33,7 @@ final class OtFormViewModelProvider
   OtFormViewModel create() => OtFormViewModel();
 }
 
-String _$otFormViewModelHash() => r'1a4ca89d0bcd8e81a8e2e34821b9672edb20d0f3';
+String _$otFormViewModelHash() => r'9226f701497f4e33d99e1c43de24f3f1e96dd8b2';
 
 abstract class _$OtFormViewModel extends $AsyncNotifier<OtFormState> {
   FutureOr<OtFormState> build();
