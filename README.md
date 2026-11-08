@@ -23,6 +23,24 @@ dart run build_runner watch -d
 flutter run
 ```
 
+### Nếu không chạy được trên Windows
+
+- Mở project ở thư mục chứa `pubspec.yaml`, chọn thiết bị **Android** rồi chạy `lib/main.dart`. Repo hiện chỉ cấu hình Firebase và nền tảng Android; không chọn Windows/Chrome để chạy bản này.
+- Nếu báo `no device selected` hoặc `device offline`, mở Device Manager, khởi động máy ảo và chờ tới màn hình chính. Dùng `flutter devices` để kiểm tra; nếu khởi động bị kẹt, thử **Cold Boot** trước, không cần xóa dữ liệu máy ảo.
+- Nếu `flutter doctor` báo thiếu license, chạy `flutter doctor --android-licenses`, đọc và chấp nhận các điều khoản phù hợp.
+- Lỗi Kotlin `this and base files have different roots` xảy ra khi project và Pub Cache nằm khác ổ đĩa trên Windows. `android/gradle.properties` đã tắt incremental compilation để tránh lỗi này. Build Kotlin có thể chậm hơn.
+- Gradle được giới hạn heap 4 GB và 2 worker để giảm áp lực bộ nhớ khi chạy cùng Android Studio/máy ảo trên máy 16 GB RAM.
+
+Kiểm tra code và tạo APK mà không cần máy ảo:
+
+```bash
+flutter analyze
+flutter test
+flutter build apk --debug
+```
+
+APK nằm ở `build/app/outputs/flutter-apk/app-debug.apk`. Các màn chấm công, OT, nghỉ phép, duyệt đơn, thông báo, hồ sơ và cài đặt hiện vẫn là `PlaceholderScreen`; cần triển khai các module này để có đầy đủ chức năng. Google Maps vẫn cần API key thật và Google Sign-In cần SHA-1 của máy trong Firebase.
+
 ## 2. Cấu trúc thư mục
 
 ```

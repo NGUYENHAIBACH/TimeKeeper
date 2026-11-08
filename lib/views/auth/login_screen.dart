@@ -32,7 +32,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
   void _submit() {
     if (!_formKey.currentState!.validate()) return;
-    ref.read(authViewModelProvider.notifier).signIn(_email.text, _password.text);
+    ref
+        .read(authViewModelProvider.notifier)
+        .signIn(_email.text, _password.text);
   }
 
   @override
@@ -75,7 +77,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     prefixIcon: Icons.lock_outline,
                     obscure: true,
                     textInputAction: TextInputAction.done,
-                    validator: Validators.password,
+                    validator: (value) =>
+                        Validators.required(value, field: 'Mật khẩu'),
                     enabled: !loading,
                   ),
                   Align(
@@ -87,7 +90,11 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       child: const Text('Quên mật khẩu?'),
                     ),
                   ),
-                  AppButton(label: 'Đăng nhập', onPressed: _submit, loading: loading),
+                  AppButton(
+                    label: 'Đăng nhập',
+                    onPressed: _submit,
+                    loading: loading,
+                  ),
                   const SizedBox(height: 16),
                   const _OrDivider(),
                   const SizedBox(height: 16),
@@ -96,8 +103,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     icon: Icons.g_mobiledata,
                     outlined: true,
                     loading: loading,
-                    onPressed: () =>
-                        ref.read(authViewModelProvider.notifier).signInWithGoogle(),
+                    onPressed: () => ref
+                        .read(authViewModelProvider.notifier)
+                        .signInWithGoogle(),
                   ),
                   const SizedBox(height: 24),
                   Row(
@@ -105,8 +113,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     children: [
                       const Text('Chưa có tài khoản?'),
                       TextButton(
-                        onPressed:
-                            loading ? null : () => context.push(AppRoutes.register),
+                        onPressed: loading
+                            ? null
+                            : () => context.push(AppRoutes.register),
                         child: const Text('Đăng ký'),
                       ),
                     ],
@@ -133,8 +142,10 @@ class _Header extends StatelessWidget {
         Icon(Icons.schedule, size: 64, color: scheme.primary),
         const SizedBox(height: 8),
         Text('TimeKeeper', style: Theme.of(context).textTheme.headlineMedium),
-        Text('Chấm công · Tăng ca · Nghỉ phép',
-            style: Theme.of(context).textTheme.bodyMedium),
+        Text(
+          'Chấm công · Tăng ca · Nghỉ phép',
+          style: Theme.of(context).textTheme.bodyMedium,
+        ),
       ],
     );
   }
@@ -149,7 +160,10 @@ class _OrDivider extends StatelessWidget {
     return const Row(
       children: [
         Expanded(child: Divider()),
-        Padding(padding: EdgeInsets.symmetric(horizontal: 12), child: Text('hoặc')),
+        Padding(
+          padding: EdgeInsets.symmetric(horizontal: 12),
+          child: Text('hoặc'),
+        ),
         Expanded(child: Divider()),
       ],
     );
