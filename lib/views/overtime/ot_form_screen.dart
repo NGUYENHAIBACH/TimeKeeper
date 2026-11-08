@@ -67,10 +67,11 @@ class _OtFormScreenState extends ConsumerState<OtFormScreen> {
     ref.read(otFormViewModelProvider.notifier).setEndTime(selected);
   }
 
-  void _checkInput() {
+  Future<void> _submit() async {
     final form = ref.read(otFormViewModelProvider).value;
     if (form == null) return;
 
+    // Kiểm tra người dùng đã chọn đủ ngày và giờ chưa.
     if (form.date == null || form.startTime == null || form.endTime == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Vui lòng chọn đầy đủ ngày và giờ OT')),
@@ -78,6 +79,7 @@ class _OtFormScreenState extends ConsumerState<OtFormScreen> {
       return;
     }
 
+    // Giờ kết thúc phải sau giờ bắt đầu.
     if (_toMinutes(form.endTime!) <= _toMinutes(form.startTime!)) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Giờ kết thúc phải sau giờ bắt đầu')),
@@ -85,11 +87,24 @@ class _OtFormScreenState extends ConsumerState<OtFormScreen> {
       return;
     }
 
+    // Chạy validator của TextFormField lý do.
     if (!_formKey.currentState!.validate()) return;
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Đã nhập đầy đủ thông tin OT')),
-    );
+    try {
+      // Gọi ViewModel để gửi đơn xuống Repository và Supabase.
+      await ref.read(otFormViewModelProvider.notifier).submit();
+
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context)
+          .showSnackBar(const SnackBar(content: Text('Gửi đơn OT thành công')));
+    } catch (error) {
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Không gửi được đơn OT: $error')));
+    }
   }
 
   @override
@@ -197,8 +212,17 @@ class _OtFormScreenState extends ConsumerState<OtFormScreen> {
                 ),
                 const SizedBox(height: 24),
                 FilledButton(
-                  onPressed: _checkInput,
-                  child: const Text('Kiểm tra thông tin'),
+                  onPressed: form.isSubmitting ? null : _submit,
+                  child: form.isSubmitting
+                      ? SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: Theme.of(context).colorScheme.onPrimary,
+                          ),
+                        )
+                      : const Text('Gửi đơn OT'),
                 ),
               ],
             ),

@@ -11,6 +11,26 @@ class OtRepository {
   Future<List<DateTime>> getHolidays() {
     return _dataSource.getHolidays();
   }
+
+  Future<void> createRequest({
+    required String employeeId,
+    required DateTime start,
+    required DateTime end,
+    required double hours,
+    required String otType,
+    required double multiplier,
+    required String reason,
+  }) {
+    return _dataSource.createRequest(
+      employeeId: employeeId,
+      start: start,
+      end: end,
+      hours: hours,
+      otType: otType,
+      multiplier: multiplier,
+      reason: reason,
+    );
+  }
 }
 
 @Riverpod(keepAlive: true)
