@@ -13,6 +13,7 @@ import 'package:timekeeper/views/auth/splash_screen.dart';
 import 'package:timekeeper/views/home/home_screen.dart';
 import 'package:timekeeper/views/leave/leave_form_screen.dart';
 import 'package:timekeeper/views/leave/leave_history_screen.dart';
+import 'package:timekeeper/views/leave/leave_team_calendar_screen.dart';
 import 'package:timekeeper/views/settings/profile_screen.dart';
 import 'package:timekeeper/views/settings/settings_screen.dart';
 import 'package:timekeeper/viewmodels/auth/auth_state_provider.dart';
@@ -142,7 +143,7 @@ GoRouter router(Ref ref) {
       ),
       GoRoute(
         path: AppRoutes.leaveTeamCalendar,
-        builder: (_, _) => const PlaceholderScreen(title: 'Lịch nghỉ team', owner: 'TV4'),
+        builder: (_, _) => const LeaveTeamCalendarScreen(),
       ),
 
       // ----- TV5: Duyệt đơn & Thông báo -----
