@@ -16,7 +16,16 @@ class OtListScreen extends ConsumerWidget {
     final stateAsync = ref.watch(otListViewModelProvider);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Đơn tăng ca')),
+      appBar: AppBar(
+        title: const Text('Đơn tăng ca'),
+        actions: [
+          IconButton(
+            tooltip: 'Báo cáo OT',
+            onPressed: () => context.push(AppRoutes.otReport),
+            icon: const Icon(Icons.bar_chart),
+          ),
+        ],
+      ),
       body: stateAsync.when(
         loading: () => const LoadingView(message: 'Đang tải đơn tăng ca'),
         error: (error, _) => ErrorView(
