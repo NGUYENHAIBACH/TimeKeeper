@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:timekeeper/core/utils/ot_calculator.dart';
+import 'package:timekeeper/repositories/ot_repository.dart';
+
 part 'ot_form_viewmodel.g.dart';
 
 class OtFormState {
@@ -21,7 +23,6 @@ class OtFormState {
     if (date == null || startTime == null || endTime == null) {
       return null;
     }
-
 
     final start = DateTime(
       date!.year,
@@ -45,14 +46,13 @@ class OtFormState {
 
     return OtCalculator.hoursBetween(start, end);
   }
+
   double? get multiplier {
     if (date == null) return null;
 
-    return OtCalculator.multiplierFor(
-      date!,
-      holidays: holidays,
-    );
+    return OtCalculator.multiplierFor(date!, holidays: holidays);
   }
+
   String? get otTypeLabel {
     final value = multiplier;
 
@@ -70,6 +70,7 @@ class OtFormState {
 
     return null;
   }
+
   OtFormState copyWith({
     DateTime? date,
     TimeOfDay? startTime,
@@ -90,21 +91,32 @@ class OtFormState {
 @riverpod
 class OtFormViewModel extends _$OtFormViewModel {
   @override
-  OtFormState build() => const OtFormState();
+  Future<OtFormState> build() async {
+    final holidays = await ref.watch(otRepositoryProvider).getHolidays();
+
+    return OtFormState(holidays: holidays);
+  }
 
   void setDate(DateTime value) {
-    state = state.copyWith(date: value);
+    _update((current) => current.copyWith(date: value));
   }
 
   void setStartTime(TimeOfDay value) {
-    state = state.copyWith(startTime: value);
+    _update((current) => current.copyWith(startTime: value));
   }
 
   void setEndTime(TimeOfDay value) {
-    state = state.copyWith(endTime: value);
+    _update((current) => current.copyWith(endTime: value));
   }
 
   void setReason(String value) {
-    state = state.copyWith(reason: value);
+    _update((current) => current.copyWith(reason: value));
+  }
+
+  void _update(OtFormState Function(OtFormState current) update) {
+    final current = state.value;
+    if (current == null) return;
+
+    state = AsyncData(update(current));
   }
 }
