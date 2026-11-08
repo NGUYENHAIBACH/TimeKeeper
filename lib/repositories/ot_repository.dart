@@ -37,6 +37,16 @@ class OtRepository {
     final rows = await _dataSource.getRequestsByEmployee(employeeId);
     return rows.map(OtRequest.fromJson).toList();
   }
+
+  Future<bool> cancelRequest({
+    required String requestId,
+    required String employeeId,
+  }) {
+    return _dataSource.cancelRequest(
+      requestId: requestId,
+      employeeId: employeeId,
+    );
+  }
 }
 
 @Riverpod(keepAlive: true)

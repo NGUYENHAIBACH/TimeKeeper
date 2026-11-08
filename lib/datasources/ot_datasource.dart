@@ -55,6 +55,21 @@ class OtDataSource {
     return rows.cast<Map<String, dynamic>>();
   }
 
+  Future<bool> cancelRequest({
+    required String requestId,
+    required String employeeId,
+  }) async {
+    final rows = await _client
+        .from('ot_requests')
+        .update({'status': 'cancelled'})
+        .eq('id', requestId)
+        .eq('employee_id', employeeId)
+        .eq('status', 'pending')
+        .select('id');
+
+    return rows.isNotEmpty;
+  }
+
   String _formatDate(DateTime value) {
     final month = value.month.toString().padLeft(2, '0');
     final day = value.day.toString().padLeft(2, '0');

@@ -33,6 +33,8 @@ class OtRequest {
   final String? rejectReason;
   final DateTime createdAt;
 
+  bool get canCancel => status == 'pending';
+
   String get timeRange => '${_shortTime(startTime)} - ${_shortTime(endTime)}';
 
   factory OtRequest.fromJson(Map<String, dynamic> json) {

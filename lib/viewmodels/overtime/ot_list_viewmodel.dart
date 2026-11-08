@@ -11,12 +11,14 @@ class OtListState {
     required this.requests,
     required this.selectedMonth,
     this.selectedStatus = 'all',
+    this.cancellingId,
   });
 
   final String employeeId;
   final List<OtRequest> requests;
   final DateTime? selectedMonth;
   final String selectedStatus;
+  final String? cancellingId;
 
   List<OtRequest> get filteredRequests {
     return requests.where((request) {
@@ -36,12 +38,17 @@ class OtListState {
     DateTime? selectedMonth,
     bool clearMonth = false,
     String? selectedStatus,
+    String? cancellingId,
+    bool clearCancelling = false,
   }) {
     return OtListState(
       employeeId: employeeId,
       requests: requests ?? this.requests,
       selectedMonth: clearMonth ? null : (selectedMonth ?? this.selectedMonth),
       selectedStatus: selectedStatus ?? this.selectedStatus,
+      cancellingId: clearCancelling
+          ? null
+          : (cancellingId ?? this.cancellingId),
     );
   }
 }
@@ -93,6 +100,35 @@ class OtListViewModel extends AsyncNotifier<OtListState> {
         .getMyRequests(current.employeeId);
     if (ref.mounted) {
       state = AsyncData(current.copyWith(requests: requests));
+    }
+  }
+
+  Future<void> cancel(String requestId) async {
+    final current = state.value;
+    if (current == null || current.cancellingId != null) return;
+
+    state = AsyncData(current.copyWith(cancellingId: requestId));
+    try {
+      final cancelled = await ref
+          .read(otRepositoryProvider)
+          .cancelRequest(requestId: requestId, employeeId: current.employeeId);
+      if (!cancelled) {
+        throw StateError('Đơn không còn ở trạng thái chờ duyệt');
+      }
+
+      final requests = await ref
+          .read(otRepositoryProvider)
+          .getMyRequests(current.employeeId);
+      if (ref.mounted) {
+        state = AsyncData(
+          current.copyWith(requests: requests, clearCancelling: true),
+        );
+      }
+    } catch (_) {
+      if (ref.mounted) {
+        state = AsyncData(current.copyWith(clearCancelling: true));
+      }
+      rethrow;
     }
   }
 }

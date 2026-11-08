@@ -68,8 +68,10 @@ class _OtListBody extends ConsumerWidget {
               sliver: SliverList.separated(
                 itemCount: requests.length,
                 separatorBuilder: (_, _) => const SizedBox(height: 8),
-                itemBuilder: (context, index) =>
-                    _OtRequestCard(request: requests[index]),
+                itemBuilder: (context, index) => _OtRequestCard(
+                  request: requests[index],
+                  isCancelling: state.cancellingId == requests[index].id,
+                ),
               ),
             ),
         ],
@@ -154,48 +156,213 @@ class _Filters extends ConsumerWidget {
   }
 }
 
-class _OtRequestCard extends StatelessWidget {
-  const _OtRequestCard({required this.request});
+class _OtRequestCard extends ConsumerWidget {
+  const _OtRequestCard({required this.request, required this.isCancelling});
 
   final OtRequest request;
+  final bool isCancelling;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return Card(
+      child: InkWell(
+        borderRadius: BorderRadius.circular(16),
+        onTap: () => _showDetail(context, ref, request),
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      '${AppDate.weekdayName(request.otDate)}, '
+                      '${AppDate.display(request.otDate)}',
+                      style: Theme.of(context).textTheme.titleMedium,
+                    ),
+                  ),
+                  _StatusChip(status: request.status),
+                ],
+              ),
+              const SizedBox(height: 8),
+              Row(
+                children: [
+                  const Icon(Icons.schedule, size: 18),
+                  const SizedBox(width: 6),
+                  Text(request.timeRange),
+                  const Spacer(),
+                  Text(
+                    '${_number(request.hours)} giờ · x${_number(request.multiplier)}',
+                    style: Theme.of(context).textTheme.labelLarge,
+                  ),
+                ],
+              ),
+              const SizedBox(height: 8),
+              Text(
+                request.reason,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+              ),
+              if (request.canCancel) ...[
+                const SizedBox(height: 8),
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: TextButton.icon(
+                    onPressed: isCancelling
+                        ? null
+                        : () => _confirmCancel(context, ref, request),
+                    icon: isCancelling
+                        ? const SizedBox.square(
+                            dimension: 16,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          )
+                        : const Icon(Icons.cancel_outlined),
+                    label: const Text('Hủy đơn'),
+                  ),
+                ),
+              ],
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+Future<void> _showDetail(
+  BuildContext context,
+  WidgetRef ref,
+  OtRequest request,
+) async {
+  await showModalBottomSheet<void>(
+    context: context,
+    showDragHandle: true,
+    isScrollControlled: true,
+    builder: (sheetContext) => SafeArea(
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
         child: Column(
+          mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
               children: [
                 Expanded(
                   child: Text(
-                    '${AppDate.weekdayName(request.otDate)}, '
-                    '${AppDate.display(request.otDate)}',
-                    style: Theme.of(context).textTheme.titleMedium,
+                    'Chi tiết đơn OT',
+                    style: Theme.of(sheetContext).textTheme.titleLarge,
                   ),
                 ),
                 _StatusChip(status: request.status),
               ],
             ),
-            const SizedBox(height: 8),
-            Row(
-              children: [
-                const Icon(Icons.schedule, size: 18),
-                const SizedBox(width: 6),
-                Text(request.timeRange),
-                const Spacer(),
-                Text(
-                  '${_number(request.hours)} giờ · x${_number(request.multiplier)}',
-                  style: Theme.of(context).textTheme.labelLarge,
-                ),
-              ],
+            const SizedBox(height: 16),
+            _DetailRow(
+              label: 'Ngày tăng ca',
+              value: AppDate.display(request.otDate),
             ),
-            const SizedBox(height: 8),
-            Text(request.reason, maxLines: 2, overflow: TextOverflow.ellipsis),
+            _DetailRow(label: 'Thời gian', value: request.timeRange),
+            _DetailRow(label: 'Số giờ', value: '${_number(request.hours)} giờ'),
+            _DetailRow(
+              label: 'Loại OT',
+              value:
+                  '${_typeLabel(request.otType)} '
+                  '(x${_number(request.multiplier)})',
+            ),
+            _DetailRow(
+              label: 'Giờ quy đổi',
+              value: '${_number(request.paidHours)} giờ',
+            ),
+            _DetailRow(label: 'Lý do', value: request.reason),
+            if (request.rejectReason?.isNotEmpty ?? false)
+              _DetailRow(label: 'Lý do từ chối', value: request.rejectReason!),
+            _DetailRow(
+              label: 'Ngày tạo',
+              value:
+                  '${AppDate.display(request.createdAt)} '
+                  '${AppDate.time(request.createdAt)}',
+            ),
+            if (request.canCancel) ...[
+              const SizedBox(height: 12),
+              SizedBox(
+                width: double.infinity,
+                child: OutlinedButton.icon(
+                  onPressed: () async {
+                    Navigator.pop(sheetContext);
+                    await _confirmCancel(context, ref, request);
+                  },
+                  icon: const Icon(Icons.cancel_outlined),
+                  label: const Text('Hủy đơn đang chờ'),
+                ),
+              ),
+            ],
           ],
         ),
+      ),
+    ),
+  );
+}
+
+Future<void> _confirmCancel(
+  BuildContext context,
+  WidgetRef ref,
+  OtRequest request,
+) async {
+  final confirmed = await showDialog<bool>(
+    context: context,
+    builder: (dialogContext) => AlertDialog(
+      title: const Text('Hủy đơn tăng ca?'),
+      content: const Text(
+        'Đơn sẽ chuyển sang trạng thái đã hủy và không thể gửi lại.',
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(dialogContext, false),
+          child: const Text('Không'),
+        ),
+        FilledButton(
+          onPressed: () => Navigator.pop(dialogContext, true),
+          child: const Text('Hủy đơn'),
+        ),
+      ],
+    ),
+  );
+  if (confirmed != true || !context.mounted) return;
+
+  try {
+    await ref.read(otListViewModelProvider.notifier).cancel(request.id);
+    if (context.mounted) {
+      ScaffoldMessenger.of(context)
+          .showSnackBar(const SnackBar(content: Text('Đã hủy đơn tăng ca')));
+    }
+  } catch (error) {
+    if (context.mounted) {
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text('Không thể hủy đơn: $error')));
+    }
+  }
+}
+
+class _DetailRow extends StatelessWidget {
+  const _DetailRow({required this.label, required this.value});
+
+  final String label;
+  final String value;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 6),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(
+            width: 110,
+            child: Text(label, style: Theme.of(context).textTheme.bodySmall),
+          ),
+          Expanded(child: Text(value)),
+        ],
       ),
     );
   }
@@ -271,6 +438,13 @@ String _statusLabel(String status) => switch (status) {
   'rejected' => 'Từ chối',
   'cancelled' => 'Đã hủy',
   _ => status,
+};
+
+String _typeLabel(String type) => switch (type) {
+  'weekday' => 'Ngày thường',
+  'weekend' => 'Cuối tuần',
+  'holiday' => 'Ngày lễ',
+  _ => type,
 };
 
 Color _statusColor(BuildContext context, String status) => switch (status) {

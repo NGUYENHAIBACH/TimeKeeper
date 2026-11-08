@@ -27,6 +27,26 @@ void main() {
       expect(request.multiplier, 2);
       expect(request.paidHours, 5);
       expect(request.timeRange, '18:00 - 20:30');
+      expect(request.canCancel, isTrue);
+    });
+
+    test('chỉ đơn pending mới được hủy', () {
+      final request = OtRequest.fromJson({
+        'id': 'request-2',
+        'employee_id': 'employee-1',
+        'ot_date': '2026-11-15',
+        'start_time': '18:00:00',
+        'end_time': '20:00:00',
+        'hours': 2,
+        'ot_type': 'weekend',
+        'multiplier': 2,
+        'paid_hours': 4,
+        'reason': 'Hoàn thành sprint',
+        'status': 'approved',
+        'created_at': '2026-11-08T04:52:26.531495+00:00',
+      });
+
+      expect(request.canCancel, isFalse);
     });
   });
 }
