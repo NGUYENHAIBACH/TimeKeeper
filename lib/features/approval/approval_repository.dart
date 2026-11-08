@@ -6,9 +6,9 @@ import 'package:path_provider/path_provider.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
-import '../../core/providers/core_providers.dart';
-import '../../data/models/profile.dart';
-import '../settings/viewmodel/profile_viewmodel.dart';
+import 'package:timekeeper/core/providers/core_providers.dart';
+import 'package:timekeeper/models/profile.dart';
+import 'package:timekeeper/viewmodels/settings/profile_viewmodel.dart';
 part 'approval_repository.g.dart';
 
 /// Data access for TV5; request table names match the shared schema.

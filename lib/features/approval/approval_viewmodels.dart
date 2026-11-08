@@ -1,7 +1,7 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import 'approval_repository.dart';
-import '../settings/viewmodel/profile_viewmodel.dart';
+import 'package:timekeeper/viewmodels/settings/profile_viewmodel.dart';
 part 'approval_viewmodels.g.dart';
 
 @riverpod

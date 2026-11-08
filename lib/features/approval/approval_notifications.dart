@@ -30,9 +30,11 @@ class ApprovalNotifications {
       }, onConflict: 'token');
     }
 
+    // ignore: deprecated_member_use
     final token = await FirebaseMessaging.instance.getToken();
     if (token != null) await save(token);
     _subscriptions.add(
+      // ignore: deprecated_member_use
       FirebaseMessaging.instance.onTokenRefresh.listen((token) async {
         try {
           await save(token);
