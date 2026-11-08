@@ -52,7 +52,8 @@ void main() {
       expect(find.text('Số dư phép năm $testYear'), findsOneWidget);
       expect(find.text('Còn 10/12'), findsOneWidget); // phép năm: 12 - 2
       expect(find.text('Còn 30/30'), findsOneWidget); // nghỉ ốm
-      expect(find.text('40 ngày'), findsOneWidget); // tổng còn lại có lương
+      expect(find.text('Phép năm còn lại'), findsOneWidget);
+      expect(find.text('10 ngày'), findsOneWidget); // chỉ tính phép năm, không cộng nghỉ ốm
       expect(find.text('1 ngày'), findsOneWidget); // đang chờ duyệt
       expect(find.text('Về quê'), findsOneWidget);
     });
@@ -141,6 +142,12 @@ void main() {
       await tester.tap(find.text('Nghỉ không lương').last);
       await tester.pumpAndSettle();
       expect(find.text('Không giới hạn'), findsOneWidget);
+    });
+
+    testWidgets('chưa chọn loại phép thì số dư hiện dấu gạch', (tester) async {
+      await _pump(tester, FakeLeaveRequestRepository(), const LeaveFormScreen());
+      expect(find.text('Không giới hạn'), findsNothing);
+      expect(find.text('-'), findsNWidgets(2)); // số ngày nghỉ và số dư
     });
 
     testWidgets('nút nửa ngày bị khóa khi chưa chọn 1 ngày', (tester) async {

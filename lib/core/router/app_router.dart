@@ -17,7 +17,6 @@ import 'package:timekeeper/views/leave/leave_team_calendar_screen.dart';
 import 'package:timekeeper/views/settings/profile_screen.dart';
 import 'package:timekeeper/views/settings/settings_screen.dart';
 import 'package:timekeeper/viewmodels/auth/auth_state_provider.dart';
-import 'package:timekeeper/core/widgets/placeholder_screen.dart';
 import 'package:timekeeper/views/overtime/ot_form_screen.dart';
 import 'package:timekeeper/views/overtime/ot_list_screen.dart';
 import 'package:timekeeper/views/overtime/ot_report_screen.dart';

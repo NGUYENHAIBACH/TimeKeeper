@@ -225,7 +225,7 @@ class _LeaveFormState extends ConsumerState<LeaveForm> {
                   style: TextStyle(fontSize: 12)),
             ),
           const SizedBox(height: 16),
-          _SummaryCard(days: days, available: available, over: over),
+          _SummaryCard(days: days, type: _type, available: available, over: over),
           const SizedBox(height: 16),
           AppTextField(
             key: const Key('leave_reason'),
@@ -279,9 +279,17 @@ class _DateField extends StatelessWidget {
 
 /// Thẻ tóm tắt: số ngày nghỉ tính được và số dư còn lại.
 class _SummaryCard extends StatelessWidget {
-  const _SummaryCard({required this.days, required this.available, required this.over});
+  const _SummaryCard({
+    required this.days,
+    required this.type,
+    required this.available,
+    required this.over,
+  });
 
   final double? days;
+
+  /// Loại phép đang chọn, null = chưa chọn.
+  final LeaveType? type;
   final double? available;
   final bool over;
 
@@ -304,7 +312,11 @@ class _SummaryCard extends StatelessWidget {
             Expanded(
               child: _Stat(
                 label: 'Số dư còn lại',
-                value: available == null ? 'Không giới hạn' : LeaveCalculator.formatDays(available!),
+                value: type == null
+                    ? '-'
+                    : available == null
+                        ? 'Không giới hạn'
+                        : LeaveCalculator.formatDays(available!),
               ),
             ),
             if (over) Icon(Icons.warning_amber, color: scheme.error),

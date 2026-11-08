@@ -73,8 +73,8 @@ class _HistoryBody extends ConsumerWidget {
           children: [
             Expanded(
               child: _TotalCard(
-                label: 'Còn lại (có lương)',
-                value: LeaveCalculator.formatDays(data.totalRemaining),
+                label: 'Phép năm còn lại',
+                value: LeaveCalculator.formatDays(data.annualRemaining),
               ),
             ),
             const SizedBox(width: 12),

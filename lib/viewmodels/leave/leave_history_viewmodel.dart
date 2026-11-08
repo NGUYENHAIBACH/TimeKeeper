@@ -28,10 +28,14 @@ class LeaveHistoryData {
   final List<LeaveBalance> balances;
   final List<LeaveRequest> requests;
 
-  /// Tổng số ngày phép (có lương) còn lại.
-  double get totalRemaining => balances
-      .where((b) => b.leaveType?.isPaid ?? true)
-      .fold(0, (s, b) => s + b.remainingDays);
+  /// Số ngày phép năm còn lại. Không cộng các loại khác (ốm, thai sản...)
+  /// vì chúng chỉ dùng được khi có lý do tương ứng.
+  double get annualRemaining {
+    for (final b in balances) {
+      if (b.leaveType?.code == 'annual') return b.remainingDays;
+    }
+    return 0;
+  }
 
   /// Tổng số ngày đang chờ duyệt.
   double get pendingDays => requests
