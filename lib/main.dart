@@ -12,6 +12,7 @@ import 'core/constants/env.dart';
 import 'core/providers/core_providers.dart';
 import 'core/router/app_router.dart';
 import 'core/theme/app_theme.dart';
+import 'viewmodels/leave/attendance_reminder_viewmodel.dart';
 import 'viewmodels/settings/settings_viewmodel.dart';
 import 'firebase_options.dart';
 
@@ -53,6 +54,8 @@ class MyApp extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final settings = ref.watch(settingsViewModelProvider);
     final router = ref.watch(routerProvider);
+    // Nhắc check-in/check-out theo giờ trong Settings (TV4).
+    ref.watch(attendanceReminderSyncProvider);
 
     return MaterialApp.router(
       title: 'TimeKeeper',

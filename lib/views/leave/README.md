@@ -15,6 +15,7 @@ Các lớp khác:
 - Repository: `lib/repositories/leave_request_repository.dart` (`leaveRequestRepositoryProvider`)
 - `leave_datasource.dart` / `leave_repository.dart` (`LeaveRepository.getLeaveBalance`): phần đọc số dư phép năm cho Home Dashboard do TV1 viết, giữ nguyên.
 - Logic: `lib/core/utils/leave_calculator.dart`
+- Nhắc giờ: `lib/core/services/attendance_reminder_service.dart` + `lib/viewmodels/leave/attendance_reminder_viewmodel.dart` (đặt thông báo theo giờ trong Settings, `MyApp` watch `attendanceReminderSyncProvider`)
 - Test: `test/leave/` (unit test logic, test ViewModel, Widget Test 3 màn)
 - ERD cho báo cáo: `docs/ERD.md`
 
