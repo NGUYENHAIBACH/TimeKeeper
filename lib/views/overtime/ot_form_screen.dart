@@ -133,6 +133,34 @@ class _OtFormScreenState extends ConsumerState<OtFormScreen> {
               trailing: const Icon(Icons.chevron_right),
               onTap: _pickEndTime,
             ),
+            if (form.hours != null) ...[
+              const Divider(),
+              Card(
+                child: ListTile(
+                  leading: const Icon(Icons.more_time),
+                  title: const Text('Thời lượng OT'),
+                  trailing: Text(
+                    '${form.hours!.toStringAsFixed(2)} giờ',
+                    style: Theme.of(context).textTheme.titleMedium,
+                  ),
+                ),
+              ),
+            ],
+            if (form.multiplier != null) ...[
+              const SizedBox(height: 12),
+              Card(
+                child: ListTile(
+                  leading: const Icon(Icons.percent),
+                  title: Text(form.otTypeLabel!),
+                  subtitle: const Text('Hệ số tăng ca'),
+                  trailing: Text(
+                    'x${form.multiplier!.toStringAsFixed(1)}'
+                        ' (${(form.multiplier! * 100).toStringAsFixed(0)}%)',
+                    style: Theme.of(context).textTheme.titleMedium,
+                  ),
+                ),
+              ),
+            ],
             const SizedBox(height: 20),
             TextFormField(
               maxLines: 3,
