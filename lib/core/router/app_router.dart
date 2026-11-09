@@ -11,10 +11,12 @@ import 'package:timekeeper/views/auth/login_screen.dart';
 import 'package:timekeeper/views/auth/register_screen.dart';
 import 'package:timekeeper/views/auth/splash_screen.dart';
 import 'package:timekeeper/views/home/home_screen.dart';
+import 'package:timekeeper/views/leave/leave_form_screen.dart';
+import 'package:timekeeper/views/leave/leave_history_screen.dart';
+import 'package:timekeeper/views/leave/leave_team_calendar_screen.dart';
 import 'package:timekeeper/views/settings/profile_screen.dart';
 import 'package:timekeeper/views/settings/settings_screen.dart';
 import 'package:timekeeper/viewmodels/auth/auth_state_provider.dart';
-import 'package:timekeeper/core/widgets/placeholder_screen.dart';
 import 'package:timekeeper/views/overtime/ot_form_screen.dart';
 import 'package:timekeeper/views/overtime/ot_list_screen.dart';
 import 'package:timekeeper/views/overtime/ot_report_screen.dart';
@@ -129,18 +131,15 @@ GoRouter router(Ref ref) {
       // ----- TV4: Nghỉ phép -----
       GoRoute(
         path: AppRoutes.leaveHistory,
-        builder: (_, _) =>
-            const PlaceholderScreen(title: 'Lịch sử nghỉ phép', owner: 'TV4'),
+        builder: (_, _) => const LeaveHistoryScreen(),
       ),
       GoRoute(
         path: AppRoutes.leaveForm,
-        builder: (_, _) =>
-            const PlaceholderScreen(title: 'Xin nghỉ phép', owner: 'TV4'),
+        builder: (_, _) => const LeaveFormScreen(),
       ),
       GoRoute(
         path: AppRoutes.leaveTeamCalendar,
-        builder: (_, _) =>
-            const PlaceholderScreen(title: 'Lịch nghỉ team', owner: 'TV4'),
+        builder: (_, _) => const LeaveTeamCalendarScreen(),
       ),
 
       // ----- TV5: Duyệt đơn & Thông báo -----
