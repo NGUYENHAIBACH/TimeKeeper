@@ -7,6 +7,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:timekeeper/core/widgets/error_view.dart';
 import 'package:timekeeper/core/widgets/loading_view.dart';
+import 'package:timekeeper/services/overtime/ot_report_export_service.dart';
 import 'package:timekeeper/viewmodels/overtime/ot_list_viewmodel.dart';
 import 'package:timekeeper/viewmodels/overtime/ot_report_summary.dart';
 
@@ -20,7 +21,9 @@ class OtReportScreen extends ConsumerStatefulWidget {
 class _OtReportScreenState extends ConsumerState<OtReportScreen> {
   late int _selectedYear;
   final _hourlyRateController = TextEditingController();
+  final _exportService = const OtReportExportService();
   double _hourlyRate = 0;
+  bool _isExporting = false;
 
   @override
   void initState() {
@@ -32,6 +35,34 @@ class _OtReportScreenState extends ConsumerState<OtReportScreen> {
   void dispose() {
     _hourlyRateController.dispose();
     super.dispose();
+  }
+
+  Future<void> _exportReport(
+    OtReportSummary summary,
+    OtReportExportFormat format,
+  ) async {
+    setState(() => _isExporting = true);
+    try {
+      final uri = await _exportService.export(
+        summary: summary,
+        hourlyRate: _hourlyRate,
+        format: format,
+      );
+      if (!mounted || uri == null) return;
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text('Đã xuất báo cáo: $uri')));
+    } catch (error) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'Không thể xuất báo cáo: ${ErrorView.friendlyMessage(error)}',
+          ),
+        ),
+      );
+    } finally {
+      if (mounted) setState(() => _isExporting = false);
+    }
   }
 
   @override
@@ -72,6 +103,74 @@ class _OtReportScreenState extends ConsumerState<OtReportScreen> {
               physics: const AlwaysScrollableScrollPhysics(),
               padding: const EdgeInsets.fromLTRB(16, 12, 16, 32),
               children: [
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: PopupMenuButton<OtReportExportFormat>(
+                    enabled: !_isExporting,
+                    tooltip: 'Xuất báo cáo',
+                    onSelected: (format) => _exportReport(summary, format),
+                    itemBuilder: (context) => const [
+                      PopupMenuItem(
+                        value: OtReportExportFormat.pdf,
+                        child: ListTile(
+                          leading: Icon(Icons.picture_as_pdf_outlined),
+                          title: Text('Xuất PDF'),
+                          contentPadding: EdgeInsets.zero,
+                        ),
+                      ),
+                      PopupMenuItem(
+                        value: OtReportExportFormat.excel,
+                        child: ListTile(
+                          leading: Icon(Icons.table_view_outlined),
+                          title: Text('Xuất Excel'),
+                          contentPadding: EdgeInsets.zero,
+                        ),
+                      ),
+                    ],
+                    child: DecoratedBox(
+                      decoration: BoxDecoration(
+                        color: _isExporting
+                            ? Theme.of(context).colorScheme.surfaceContainerHigh
+                            : Theme.of(context).colorScheme.primary,
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 10,
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            if (_isExporting)
+                              const SizedBox.square(
+                                dimension: 18,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                ),
+                              )
+                            else
+                              Icon(
+                                Icons.download_outlined,
+                                color: Theme.of(context).colorScheme.onPrimary,
+                              ),
+                            const SizedBox(width: 8),
+                            Text(
+                              _isExporting ? 'Đang xuất...' : 'Xuất báo cáo',
+                              style: TextStyle(
+                                color: _isExporting
+                                    ? Theme.of(context).colorScheme.onSurface
+                                    : Theme.of(context).colorScheme.onPrimary,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 12),
                 DropdownButtonFormField<int>(
                   initialValue: _selectedYear,
                   decoration: const InputDecoration(
@@ -196,7 +295,11 @@ class _MonthlyChart extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final highest = summary.monthlyHours.fold<double>(0, math.max);
-    final maxY = math.max(4.0, (highest * 1.25).ceilToDouble());
+    final interval = _chartInterval(highest);
+    final maxY = math.max(
+      interval * 4,
+      (highest / interval).ceilToDouble() * interval,
+    );
 
     return Card(
       child: Padding(
@@ -228,7 +331,7 @@ class _MonthlyChart extends StatelessWidget {
                   borderData: FlBorderData(show: false),
                   gridData: FlGridData(
                     drawVerticalLine: false,
-                    horizontalInterval: math.max(1, maxY / 4),
+                    horizontalInterval: interval,
                   ),
                   titlesData: FlTitlesData(
                     topTitles: const AxisTitles(
@@ -241,7 +344,7 @@ class _MonthlyChart extends StatelessWidget {
                       sideTitles: SideTitles(
                         showTitles: true,
                         reservedSize: 34,
-                        interval: math.max(1, maxY / 4),
+                        interval: interval,
                         getTitlesWidget: (value, meta) => Text(
                           value.toStringAsFixed(0),
                           style: Theme.of(context).textTheme.labelSmall,
@@ -364,3 +467,21 @@ class _PayEstimateCard extends StatelessWidget {
 String _number(double value) => value == value.roundToDouble()
     ? value.toStringAsFixed(0)
     : value.toStringAsFixed(2);
+
+double _chartInterval(double highest) {
+  if (highest <= 4) return 1;
+
+  final roughInterval = highest / 4;
+  final magnitude = math
+      .pow(10, (math.log(roughInterval) / math.ln10).floor())
+      .toDouble();
+  final normalized = roughInterval / magnitude;
+
+  final niceInterval = switch (normalized) {
+    <= 1.5 => 1,
+    <= 3 => 2,
+    <= 7 => 5,
+    _ => 10,
+  };
+  return niceInterval * magnitude;
+}
