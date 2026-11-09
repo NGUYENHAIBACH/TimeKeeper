@@ -1,34 +1,52 @@
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
-/// Owns FCM listeners. The caller must stop this service on sign-out.
+import '../providers/core_providers.dart';
+
+part 'approval_notification_service.g.dart';
+
+/// Owns FCM and Supabase Realtime listeners for the signed-in profile.
 class ApprovalNotificationService {
   ApprovalNotificationService(this.client);
+
   final SupabaseClient client;
   final local = FlutterLocalNotificationsPlugin();
   final List<StreamSubscription<dynamic>> _subscriptions = [];
-  Future<void> start(
-    String profileId,
-    void Function(Map<String, dynamic>) onOpen,
-  ) async {
+  final _openEvents = StreamController<Map<String, dynamic>>.broadcast();
+  final _realtimeEvents = StreamController<Map<String, dynamic>>.broadcast();
+  RealtimeChannel? _channel;
+
+  Stream<Map<String, dynamic>> get openEvents => _openEvents.stream;
+  Stream<Map<String, dynamic>> get realtimeEvents => _realtimeEvents.stream;
+
+  Future<void> start(String profileId) async {
     await stop();
     await local.initialize(
       settings: const InitializationSettings(
         android: AndroidInitializationSettings('@mipmap/ic_launcher'),
       ),
+      onDidReceiveNotificationResponse: (response) {
+        final payload = response.payload;
+        if (payload == null || payload.isEmpty) return;
+        final decoded = jsonDecode(payload);
+        if (decoded is Map) {
+          _openEvents.add(Map<String, dynamic>.from(decoded));
+        }
+      },
     );
     await FirebaseMessaging.instance.requestPermission();
-    Future<void> save(String token) async {
-      await client.from('fcm_tokens').upsert({
-        'employee_id': profileId,
-        'token': token,
-        'platform': 'android',
-        'updated_at': DateTime.now().toUtc().toIso8601String(),
-      }, onConflict: 'token');
-    }
+
+    Future<void> save(String token) => client.from('fcm_tokens').upsert({
+      'employee_id': profileId,
+      'token': token,
+      'platform': 'android',
+      'updated_at': DateTime.now().toUtc().toIso8601String(),
+    }, onConflict: 'token');
 
     // ignore: deprecated_member_use
     final token = await FirebaseMessaging.instance.getToken();
@@ -39,7 +57,7 @@ class ApprovalNotificationService {
         try {
           await save(token);
         } catch (_) {
-          /* Retry on next app session. */
+          // Retry when the next app session starts.
         }
       }),
     );
@@ -57,16 +75,32 @@ class ApprovalNotificationService {
               priority: Priority.high,
             ),
           ),
+          payload: jsonEncode(message.data),
         );
       }),
     );
     _subscriptions.add(
       FirebaseMessaging.onMessageOpenedApp.listen(
-        (message) => onOpen(message.data),
+        (message) => _openEvents.add(message.data),
       ),
     );
     final initial = await FirebaseMessaging.instance.getInitialMessage();
-    if (initial != null) onOpen(initial.data);
+    if (initial != null) _openEvents.add(initial.data);
+
+    _channel = client
+        .channel('notifications-$profileId')
+        .onPostgresChanges(
+          event: PostgresChangeEvent.insert,
+          schema: 'public',
+          table: 'notifications',
+          filter: PostgresChangeFilter(
+            type: PostgresChangeFilterType.eq,
+            column: 'recipient_id',
+            value: profileId,
+          ),
+          callback: (payload) => _realtimeEvents.add(payload.newRecord),
+        )
+        .subscribe();
   }
 
   Future<void> stop() async {
@@ -74,5 +108,12 @@ class ApprovalNotificationService {
       await subscription.cancel();
     }
     _subscriptions.clear();
+    final channel = _channel;
+    _channel = null;
+    if (channel != null) await client.removeChannel(channel);
   }
 }
+
+@Riverpod(keepAlive: true)
+ApprovalNotificationService approvalNotificationService(Ref ref) =>
+    ApprovalNotificationService(ref.watch(supabaseProvider));

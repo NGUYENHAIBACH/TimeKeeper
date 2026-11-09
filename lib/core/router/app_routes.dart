@@ -44,6 +44,21 @@ class AppRoutes {
   static const notifications = '/notifications';
   static const teamDashboard = '/team';
 
+  /// Mở trung tâm thông báo và tự hiển thị đúng đơn được push tham chiếu.
+  static String notificationDetail({
+    required String table,
+    required String id,
+    String? notificationId,
+  }) => Uri(
+    path: notifications,
+    queryParameters: {
+      'table': table,
+      'id': id,
+      // ignore: use_null_aware_elements
+      if (notificationId != null) 'notificationId': notificationId,
+    },
+  ).toString();
+
   /// Các route không cần đăng nhập.
   static const publicRoutes = {splash, login, register, forgotPassword};
 }

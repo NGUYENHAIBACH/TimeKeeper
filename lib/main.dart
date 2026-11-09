@@ -1,6 +1,7 @@
 import 'dart:developer' as dev;
 
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -11,10 +12,19 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'core/constants/env.dart';
 import 'core/providers/core_providers.dart';
 import 'core/router/app_router.dart';
+import 'core/router/app_routes.dart';
 import 'core/theme/app_theme.dart';
 import 'viewmodels/leave/attendance_reminder_viewmodel.dart';
+import 'viewmodels/approval/approval_inbox_viewmodel.dart';
+import 'viewmodels/approval/approval_notification_sync.dart';
+import 'viewmodels/approval/notification_center_viewmodel.dart';
 import 'viewmodels/settings/settings_viewmodel.dart';
 import 'firebase_options.dart';
+
+@pragma('vm:entry-point')
+Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+}
 
 /// Điểm vào app: khởi tạo Firebase, Supabase, SharedPreferences rồi chạy
 /// [MyApp] trong ProviderScope.
@@ -26,6 +36,9 @@ Future<void> main() async {
   // khối try/catch này không còn tác dụng.
   try {
     await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+    FirebaseMessaging.onBackgroundMessage(
+      _firebaseMessagingBackgroundHandler,
+    );
   } on UnsupportedError catch (e) {
     dev.log('Firebase chưa cấu hình: ${e.message}', name: 'main');
   }
@@ -54,6 +67,30 @@ class MyApp extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final settings = ref.watch(settingsViewModelProvider);
     final router = ref.watch(routerProvider);
+    ref.listen(approvalNotificationOpenEventsProvider, (_, next) {
+      next.whenData((data) {
+        final table = data['ref_table']?.toString();
+        final id = data['ref_id']?.toString();
+        if (table == null || id == null) {
+          router.go(AppRoutes.notifications);
+          return;
+        }
+        router.go(
+          AppRoutes.notificationDetail(
+            table: table,
+            id: id,
+            notificationId: data['notification_id']?.toString(),
+          ),
+        );
+      });
+    });
+    ref.listen(approvalNotificationRealtimeEventsProvider, (_, next) {
+      next.whenData((_) {
+        ref.invalidate(notificationCenterViewModelProvider);
+        ref.invalidate(approvalInboxViewModelProvider);
+      });
+    });
+    ref.watch(approvalNotificationSyncProvider);
     // Nhắc check-in/check-out theo giờ trong Settings (TV4).
     ref.watch(attendanceReminderSyncProvider);
 

@@ -65,19 +65,16 @@ class ApprovalInboxScreen extends ConsumerWidget {
     WidgetRef ref,
     Map<String, dynamic> row,
   ) async {
-    final reason = TextEditingController();
-    final result = await showDialog<bool>(
+    final result = await showDialog<(bool, String)>(
       context: context,
-      builder: (context) =>
-          _ApprovalDecisionDialog(row: row, reasonController: reason),
+      builder: (context) => _ApprovalDecisionDialog(row: row),
     );
-    final text = reason.text;
-    reason.dispose();
     if (result == null || !context.mounted) return;
+    final (approve, reason) = result;
     try {
       await ref
           .read(approvalInboxViewModelProvider.notifier)
-          .decide(row, result, text);
+          .decide(row, approve, reason);
     } catch (e) {
       if (context.mounted) {
         ScaffoldMessenger.of(
@@ -89,13 +86,9 @@ class ApprovalInboxScreen extends ConsumerWidget {
 }
 
 class _ApprovalDecisionDialog extends StatefulWidget {
-  const _ApprovalDecisionDialog({
-    required this.row,
-    required this.reasonController,
-  });
+  const _ApprovalDecisionDialog({required this.row});
 
   final Map<String, dynamic> row;
-  final TextEditingController reasonController;
 
   @override
   State<_ApprovalDecisionDialog> createState() =>
@@ -103,7 +96,20 @@ class _ApprovalDecisionDialog extends StatefulWidget {
 }
 
 class _ApprovalDecisionDialogState extends State<_ApprovalDecisionDialog> {
+  late final TextEditingController _reasonController;
   String? _reasonError;
+
+  @override
+  void initState() {
+    super.initState();
+    _reasonController = TextEditingController();
+  }
+
+  @override
+  void dispose() {
+    _reasonController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -159,7 +165,7 @@ class _ApprovalDecisionDialogState extends State<_ApprovalDecisionDialog> {
               ),
               const Divider(height: 24),
               TextField(
-                controller: widget.reasonController,
+                controller: _reasonController,
                 minLines: 2,
                 maxLines: 3,
                 decoration: InputDecoration(
@@ -187,7 +193,7 @@ class _ApprovalDecisionDialogState extends State<_ApprovalDecisionDialog> {
                   const SizedBox(width: 12),
                   Expanded(
                     child: FilledButton.icon(
-                      onPressed: () => Navigator.pop(context, true),
+                      onPressed: () => Navigator.pop(context, (true, '')),
                       icon: const Icon(Icons.check),
                       label: const Text('Duyệt'),
                     ),
@@ -202,11 +208,11 @@ class _ApprovalDecisionDialogState extends State<_ApprovalDecisionDialog> {
   }
 
   void _reject() {
-    if (widget.reasonController.text.trim().isEmpty) {
+    if (_reasonController.text.trim().isEmpty) {
       setState(() => _reasonError = 'Vui lòng nhập lý do từ chối');
       return;
     }
-    Navigator.pop(context, false);
+    Navigator.pop(context, (false, _reasonController.text));
   }
 }
 
@@ -296,10 +302,42 @@ String _otType(String value) => switch (value) {
   _ => value,
 };
 
-class NotificationCenterScreen extends ConsumerWidget {
-  const NotificationCenterScreen({super.key});
+class NotificationCenterScreen extends ConsumerStatefulWidget {
+  const NotificationCenterScreen({
+    super.key,
+    this.initialTable,
+    this.initialRequestId,
+    this.initialNotificationId,
+  });
+
+  final String? initialTable;
+  final String? initialRequestId;
+  final String? initialNotificationId;
+
   @override
-  Widget build(BuildContext context, WidgetRef ref) => Scaffold(
+  ConsumerState<NotificationCenterScreen> createState() =>
+      _NotificationCenterScreenState();
+}
+
+class _NotificationCenterScreenState
+    extends ConsumerState<NotificationCenterScreen> {
+  @override
+  void initState() {
+    super.initState();
+    if (widget.initialTable != null && widget.initialRequestId != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _openDetail(
+          table: widget.initialTable!,
+          requestId: widget.initialRequestId!,
+          notificationId: widget.initialNotificationId,
+          title: 'Chi tiết đơn',
+        );
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) => Scaffold(
     appBar: AppBar(
       title: const Text('Thông báo'),
       actions: [
@@ -330,58 +368,60 @@ class NotificationCenterScreen extends ConsumerWidget {
                           ),
                           title: Text('${row['title']}'),
                           subtitle: Text('${row['body']}'),
-                          onTap: () async {
-                            try {
-                              final detail = await ref
-                                  .read(
-                                    notificationCenterViewModelProvider
-                                        .notifier,
-                                  )
-                                  .detail(
-                                    row['ref_table'] as String,
-                                    row['ref_id'] as String,
-                                  );
-                              await ref
-                                  .read(
-                                    notificationCenterViewModelProvider
-                                        .notifier,
-                                  )
-                                  .markRead(row['id'] as String);
-                              if (context.mounted) {
-                                showDialog<void>(
-                                  context: context,
-                                  builder: (context) => AlertDialog(
-                                    title: Text('${row['title']}'),
-                                    content: SingleChildScrollView(
-                                      child: Text(
-                                        detail.entries
-                                            .map((e) => '${e.key}: ${e.value}')
-                                            .join('\n'),
-                                      ),
-                                    ),
-                                    actions: [
-                                      TextButton(
-                                        onPressed: () => Navigator.pop(context),
-                                        child: const Text('Đóng'),
-                                      ),
-                                    ],
-                                  ),
-                                );
-                              }
-                            } catch (e) {
-                              if (context.mounted) {
-                                ScaffoldMessenger.of(
-                                  context,
-                                ).showSnackBar(SnackBar(content: Text('$e')));
-                              }
-                            }
-                          },
+                          onTap: () => _openDetail(
+                            table: row['ref_table'] as String,
+                            requestId: row['ref_id'] as String,
+                            notificationId: row['id'] as String,
+                            title: '${row['title']}',
+                          ),
                         ),
                       )
                       .toList(),
                 ),
         ),
   );
+
+  Future<void> _openDetail({
+    required String table,
+    required String requestId,
+    required String title,
+    String? notificationId,
+  }) async {
+    try {
+      final detail = await ref
+          .read(notificationCenterViewModelProvider.notifier)
+          .detail(table, requestId);
+      if (notificationId != null) {
+        await ref
+            .read(notificationCenterViewModelProvider.notifier)
+            .markRead(notificationId);
+      }
+      if (!mounted) return;
+      await showDialog<void>(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: Text(title),
+          content: SingleChildScrollView(
+            child: Text(
+              detail.entries.map((e) => '${e.key}: ${e.value}').join('\n'),
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Đóng'),
+            ),
+          ],
+        ),
+      );
+    } catch (error) {
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(ErrorView.friendlyMessage(error))));
+      }
+    }
+  }
 }
 
 class TeamDashboardScreen extends ConsumerWidget {

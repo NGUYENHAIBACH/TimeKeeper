@@ -15,12 +15,12 @@ class ApprovalRepository {
     String id,
   ) async {
     if (!tables.contains(table)) throw ArgumentError('Loại đơn không hợp lệ');
-    return await client
-        .from(table)
-        .select()
-        .eq('id', id)
-        .eq('employee_id', actor.id)
-        .single();
+    final row = await client.from(table).select().eq('id', id).single();
+    final employeeId = row['employee_id'] as String;
+    if (employeeId != actor.id && !(await team(actor)).contains(employeeId)) {
+      throw StateError('Bạn không có quyền xem đơn này');
+    }
+    return row;
   }
 
   static const tables = [
@@ -90,7 +90,23 @@ class ApprovalRepository {
     if (!(await team(actor)).contains(row['employee_id'])) {
       throw StateError('Đơn không thuộc đội nhóm');
     }
-    await _decideWithCurrentDevPolicy(actor, row, approve, reason.trim());
+    try {
+      await client.rpc(
+        'tv5_decide_request',
+        params: {
+          'p_table': row['table'],
+          'p_id': row['id'],
+          'p_actor': actor.id,
+          'p_approve': approve,
+          'p_reason': reason.trim(),
+        },
+      );
+    } on PostgrestException catch (error) {
+      // Giữ app chạy với database cũ trong lúc cả nhóm chưa chạy migration.
+      // Sau khi chạy supabase/tv5_approval.sql, RPC xử lý mọi việc atomically.
+      if (error.code != 'PGRST202') rethrow;
+      await _decideWithCurrentDevPolicy(actor, row, approve, reason.trim());
+    }
   }
 
   /// Cập nhật trực tiếp vì project đang dùng Firebase Auth tách rời Supabase
@@ -123,6 +139,10 @@ class ApprovalRepository {
       throw StateError('Đơn đã được người khác xử lý hoặc không còn tồn tại');
     }
 
+    if (approve) {
+      await _applyApprovedEffects(row);
+    }
+
     await client.from('notifications').insert({
       'recipient_id': row['employee_id'],
       'title': approve ? 'Đơn đã được duyệt' : 'Đơn bị từ chối',
@@ -133,6 +153,102 @@ class ApprovalRepository {
       'ref_table': table,
       'ref_id': requestId,
     });
+  }
+
+  Future<void> _applyApprovedEffects(Map<String, dynamic> row) async {
+    switch (row['table']) {
+      case 'leave_requests':
+        await _applyLeaveBalance(row);
+        return;
+      case 'attendance_corrections':
+        await _applyAttendanceCorrection(row);
+        return;
+    }
+  }
+
+  Future<void> _applyLeaveBalance(Map<String, dynamic> row) async {
+    final startDate = DateTime.parse(row['start_date'] as String);
+    final employeeId = row['employee_id'] as String;
+    final leaveTypeId = row['leave_type_id'] as String;
+    final used = (row['total_days'] as num).toDouble();
+    final existing = await client
+        .from('leave_balances')
+        .select('id, used_days')
+        .eq('employee_id', employeeId)
+        .eq('leave_type_id', leaveTypeId)
+        .eq('year', startDate.year)
+        .maybeSingle();
+    if (existing != null) {
+      await client
+          .from('leave_balances')
+          .update({
+            'used_days': (existing['used_days'] as num).toDouble() + used,
+          })
+          .eq('id', existing['id'] as String);
+      return;
+    }
+    final leaveType = await client
+        .from('leave_types')
+        .select('default_days')
+        .eq('id', leaveTypeId)
+        .single();
+    await client.from('leave_balances').insert({
+      'employee_id': employeeId,
+      'leave_type_id': leaveTypeId,
+      'year': startDate.year,
+      'total_days': leaveType['default_days'],
+      'used_days': used,
+    });
+  }
+
+  Future<void> _applyAttendanceCorrection(Map<String, dynamic> row) async {
+    Map<String, dynamic>? attendance;
+    final attendanceId = row['attendance_id'] as String?;
+    if (attendanceId != null) {
+      attendance = await client
+          .from('attendance_records')
+          .select()
+          .eq('id', attendanceId)
+          .maybeSingle();
+    }
+    attendance ??= await client
+        .from('attendance_records')
+        .select()
+        .eq('employee_id', row['employee_id'] as String)
+        .eq('work_date', row['work_date'] as String)
+        .maybeSingle();
+
+    final checkIn = row['requested_check_in'] ?? attendance?['check_in_at'];
+    final checkOut = row['requested_check_out'] ?? attendance?['check_out_at'];
+    final checkInDate = checkIn == null ? null : DateTime.parse('$checkIn');
+    final checkOutDate = checkOut == null ? null : DateTime.parse('$checkOut');
+    if (checkInDate != null &&
+        checkOutDate != null &&
+        checkOutDate.isBefore(checkInDate)) {
+      throw StateError('Giờ ra phải sau giờ vào');
+    }
+    final saved = await client
+        .from('attendance_records')
+        .upsert({
+          if (attendance?['id'] != null) 'id': attendance!['id'],
+          'employee_id': row['employee_id'],
+          'work_date': row['work_date'],
+          'check_in_at': checkIn,
+          'check_out_at': checkOut,
+          'work_hours': checkInDate != null && checkOutDate != null
+              ? checkOutDate.difference(checkInDate).inMinutes / 60
+              : (attendance?['work_hours'] ?? 0),
+          'status': attendance?['status'] == 'absent'
+              ? 'present'
+              : (attendance?['status'] ?? 'present'),
+          'note': 'Cập nhật từ đơn bù công ${row['id']}',
+        }, onConflict: 'employee_id,work_date')
+        .select('id')
+        .single();
+    await client
+        .from('attendance_corrections')
+        .update({'attendance_id': saved['id']})
+        .eq('id', row['id'] as String);
   }
 
   String _requestTypeLabel(String table) => switch (table) {
