@@ -10,10 +10,18 @@ import 'package:timekeeper/viewmodels/approval/notification_center_viewmodel.dar
 import 'package:timekeeper/viewmodels/approval/team_dashboard_viewmodel.dart';
 
 /// TV5 inbox. Mutations are handled by the ViewModel and repository.
-class ApprovalInboxScreen extends ConsumerWidget {
+class ApprovalInboxScreen extends ConsumerStatefulWidget {
   const ApprovalInboxScreen({super.key});
+
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<ApprovalInboxScreen> createState() => _ApprovalInboxScreenState();
+}
+
+class _ApprovalInboxScreenState extends ConsumerState<ApprovalInboxScreen> {
+  String? _selectedTable; // null = all, 'ot_requests', 'leave_requests', 'attendance_corrections'
+
+  @override
+  Widget build(BuildContext context) {
     final value = ref.watch(approvalInboxViewModelProvider);
     return Scaffold(
       appBar: AppBar(
@@ -31,31 +39,74 @@ class ApprovalInboxScreen extends ConsumerWidget {
           error: e,
           onRetry: () => ref.invalidate(approvalInboxViewModelProvider),
         ),
-        data: (rows) => rows.isEmpty
-            ? const Center(child: Text('Không có đơn chờ duyệt'))
-            : ListView(
-                children: rows
-                    .map(
-                      (row) => Card(
-                        margin: const EdgeInsets.fromLTRB(16, 6, 16, 6),
-                        child: ListTile(
-                          leading: CircleAvatar(
-                            child: Icon(_requestIcon(row['table'] as String)),
-                          ),
-                          title: Text(_requestTitle(row['table'] as String)),
-                          subtitle: Text(
-                            '${_employeeLabel(row)}\n${_requestSummary(row)}',
-                            maxLines: 3,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                          isThreeLine: true,
-                          onTap: () => _decide(context, ref, row),
-                          trailing: const Icon(Icons.chevron_right),
-                        ),
-                      ),
-                    )
-                    .toList(),
+        data: (rows) {
+          final filteredRows = _selectedTable == null
+              ? rows
+              : rows.where((row) => row['table'] == _selectedTable).toList();
+
+          return Column(
+            children: [
+              SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                child: Row(
+                  children: [
+                    FilterChip(
+                      label: const Text('Tất cả'),
+                      selected: _selectedTable == null,
+                      onSelected: (_) => setState(() => _selectedTable = null),
+                    ),
+                    const SizedBox(width: 8),
+                    FilterChip(
+                      label: const Text('Đơn tăng ca (OT)'),
+                      selected: _selectedTable == 'ot_requests',
+                      onSelected: (_) => setState(() => _selectedTable = 'ot_requests'),
+                    ),
+                    const SizedBox(width: 8),
+                    FilterChip(
+                      label: const Text('Nghỉ phép'),
+                      selected: _selectedTable == 'leave_requests',
+                      onSelected: (_) => setState(() => _selectedTable = 'leave_requests'),
+                    ),
+                    const SizedBox(width: 8),
+                    FilterChip(
+                      label: const Text('Bù công'),
+                      selected: _selectedTable == 'attendance_corrections',
+                      onSelected: (_) => setState(() => _selectedTable = 'attendance_corrections'),
+                    ),
+                  ],
+                ),
               ),
+              Expanded(
+                child: filteredRows.isEmpty
+                    ? const Center(child: Text('Không có đơn chờ duyệt'))
+                    : ListView(
+                        children: filteredRows
+                            .map(
+                              (row) => Card(
+                                margin: const EdgeInsets.fromLTRB(16, 6, 16, 6),
+                                child: ListTile(
+                                  leading: CircleAvatar(
+                                    child: Icon(_requestIcon(row['table'] as String)),
+                                  ),
+                                  title: Text(_requestTitle(row['table'] as String)),
+                                  subtitle: Text(
+                                    '${_employeeLabel(row)}\n${_requestSummary(row)}',
+                                    maxLines: 3,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                  isThreeLine: true,
+                                  onTap: () => _decide(context, ref, row),
+                                  trailing: const Icon(Icons.chevron_right),
+                                ),
+                              ),
+                            )
+                            .toList(),
+                      ),
+              ),
+            ],
+          );
+        },
       ),
     );
   }

@@ -7,6 +7,7 @@ import 'package:timekeeper/repositories/approval_repository.dart';
 import 'package:timekeeper/viewmodels/approval/approval_inbox_viewmodel.dart';
 import 'package:timekeeper/viewmodels/approval/notification_center_viewmodel.dart';
 import 'package:timekeeper/viewmodels/approval/team_dashboard_viewmodel.dart';
+import 'package:timekeeper/viewmodels/auth/auth_state_provider.dart';
 import 'package:timekeeper/viewmodels/settings/profile_viewmodel.dart';
 
 const manager = Profile(
@@ -76,6 +77,7 @@ ProviderContainer _container(_ApprovalRepository repository) {
   final container = ProviderContainer(
     overrides: [
       profileViewModelProvider.overrideWith(_ProfileViewModel.new),
+      authStateProvider.overrideWith((ref) => Stream.value(null)),
       approvalRepositoryProvider.overrideWithValue(repository),
     ],
   );
