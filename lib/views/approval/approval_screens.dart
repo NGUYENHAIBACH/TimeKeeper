@@ -4,20 +4,23 @@ import 'package:intl/intl.dart';
 
 import '../../core/widgets/error_view.dart';
 import '../../core/widgets/loading_view.dart';
-import 'approval_viewmodels.dart';
+
+import 'package:timekeeper/viewmodels/approval/approval_inbox_viewmodel.dart';
+import 'package:timekeeper/viewmodels/approval/notification_center_viewmodel.dart';
+import 'package:timekeeper/viewmodels/approval/team_dashboard_viewmodel.dart';
 
 /// TV5 inbox. Mutations are handled by the ViewModel and repository.
 class ApprovalInboxScreen extends ConsumerWidget {
   const ApprovalInboxScreen({super.key});
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final value = ref.watch(approvalInboxProvider);
+    final value = ref.watch(approvalInboxViewModelProvider);
     return Scaffold(
       appBar: AppBar(
         title: const Text('Hộp duyệt đơn'),
         actions: [
           IconButton(
-            onPressed: () => ref.invalidate(approvalInboxProvider),
+            onPressed: () => ref.invalidate(approvalInboxViewModelProvider),
             icon: const Icon(Icons.refresh),
           ),
         ],
@@ -26,7 +29,7 @@ class ApprovalInboxScreen extends ConsumerWidget {
         loading: () => const LoadingView(),
         error: (e, s) => ErrorView(
           error: e,
-          onRetry: () => ref.invalidate(approvalInboxProvider),
+          onRetry: () => ref.invalidate(approvalInboxViewModelProvider),
         ),
         data: (rows) => rows.isEmpty
             ? const Center(child: Text('Không có đơn chờ duyệt'))
@@ -72,7 +75,9 @@ class ApprovalInboxScreen extends ConsumerWidget {
     reason.dispose();
     if (result == null || !context.mounted) return;
     try {
-      await ref.read(approvalInboxProvider.notifier).decide(row, result, text);
+      await ref
+          .read(approvalInboxViewModelProvider.notifier)
+          .decide(row, result, text);
     } catch (e) {
       if (context.mounted) {
         ScaffoldMessenger.of(
@@ -299,18 +304,18 @@ class NotificationCenterScreen extends ConsumerWidget {
       title: const Text('Thông báo'),
       actions: [
         IconButton(
-          onPressed: () => ref.invalidate(notificationCenterProvider),
+          onPressed: () => ref.invalidate(notificationCenterViewModelProvider),
           icon: const Icon(Icons.refresh),
         ),
       ],
     ),
     body: ref
-        .watch(notificationCenterProvider)
+        .watch(notificationCenterViewModelProvider)
         .when(
           loading: () => const LoadingView(),
           error: (e, s) => ErrorView(
             error: e,
-            onRetry: () => ref.invalidate(notificationCenterProvider),
+            onRetry: () => ref.invalidate(notificationCenterViewModelProvider),
           ),
           data: (rows) => rows.isEmpty
               ? const Center(child: Text('Chưa có thông báo'))
@@ -328,13 +333,19 @@ class NotificationCenterScreen extends ConsumerWidget {
                           onTap: () async {
                             try {
                               final detail = await ref
-                                  .read(notificationCenterProvider.notifier)
+                                  .read(
+                                    notificationCenterViewModelProvider
+                                        .notifier,
+                                  )
                                   .detail(
                                     row['ref_table'] as String,
                                     row['ref_id'] as String,
                                   );
                               await ref
-                                  .read(notificationCenterProvider.notifier)
+                                  .read(
+                                    notificationCenterViewModelProvider
+                                        .notifier,
+                                  )
                                   .markRead(row['id'] as String);
                               if (context.mounted) {
                                 showDialog<void>(
@@ -388,7 +399,7 @@ class TeamDashboardScreen extends ConsumerWidget {
           onSelected: (pdf) async {
             try {
               final path = await ref
-                  .read(teamDashboardProvider.notifier)
+                  .read(teamDashboardViewModelProvider.notifier)
                   .export(pdf);
               if (context.mounted) {
                 ScaffoldMessenger.of(context)
@@ -404,18 +415,18 @@ class TeamDashboardScreen extends ConsumerWidget {
           },
         ),
         IconButton(
-          onPressed: () => ref.invalidate(teamDashboardProvider),
+          onPressed: () => ref.invalidate(teamDashboardViewModelProvider),
           icon: const Icon(Icons.refresh),
         ),
       ],
     ),
     body: ref
-        .watch(teamDashboardProvider)
+        .watch(teamDashboardViewModelProvider)
         .when(
           loading: () => const LoadingView(),
           error: (e, s) => ErrorView(
             error: e,
-            onRetry: () => ref.invalidate(teamDashboardProvider),
+            onRetry: () => ref.invalidate(teamDashboardViewModelProvider),
           ),
           data: (rows) => rows.isEmpty
               ? const Center(

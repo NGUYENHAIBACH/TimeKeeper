@@ -20,7 +20,7 @@ import 'package:timekeeper/viewmodels/auth/auth_state_provider.dart';
 import 'package:timekeeper/views/overtime/ot_form_screen.dart';
 import 'package:timekeeper/views/overtime/ot_list_screen.dart';
 import 'package:timekeeper/views/overtime/ot_report_screen.dart';
-import 'package:timekeeper/features/approval/approval_screens.dart';
+import 'package:timekeeper/views/approval/approval_screens.dart';
 
 import 'app_routes.dart';
 
