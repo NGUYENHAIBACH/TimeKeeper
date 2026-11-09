@@ -8,7 +8,7 @@ Run schema.sql then tv5_approval.sql in Supabase SQL Editor. RPC updates request
 
 The existing schema grants broad development access; replace dev_all policies before production. Leave-balance accounting must be agreed with TV4 before claiming approved leave updates balances.
 
-ApprovalNotifications provides FCM token registration and foreground local notifications, but is not yet wired into app lifecycle. A trusted server/Edge Function must send FCM HTTP v1 messages after notifications are inserted. Never put service account credentials in Flutter. Scheduled reminders and notification tap routing still require completion.
+`ApprovalNotificationService` is wired to the signed-in profile. It registers FCM tokens, listens to `notifications` through Supabase Realtime, displays foreground local notifications, and routes notification taps to the referenced request. Deploy `supabase/functions/send-notification` and configure an INSERT Database Webhook as documented in that function's README. Never put service-account credentials in Flutter.
 
 ## Test results
 Implementation is under verification. No successful release build or end-to-end approval/push test has been established for TV5 yet. Earlier app tests do not validate this module.

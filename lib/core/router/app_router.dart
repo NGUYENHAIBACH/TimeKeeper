@@ -149,7 +149,12 @@ GoRouter router(Ref ref) {
       ),
       GoRoute(
         path: AppRoutes.notifications,
-        builder: (_, _) => const NotificationCenterScreen(),
+        builder: (_, state) => NotificationCenterScreen(
+          initialTable: state.uri.queryParameters['table'],
+          initialRequestId: state.uri.queryParameters['id'],
+          initialNotificationId:
+              state.uri.queryParameters['notificationId'],
+        ),
       ),
       GoRoute(
         path: AppRoutes.teamDashboard,
