@@ -5,8 +5,8 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 /// Owns FCM listeners. The caller must stop this service on sign-out.
-class ApprovalNotifications {
-  ApprovalNotifications(this.client);
+class ApprovalNotificationService {
+  ApprovalNotificationService(this.client);
   final SupabaseClient client;
   final local = FlutterLocalNotificationsPlugin();
   final List<StreamSubscription<dynamic>> _subscriptions = [];
