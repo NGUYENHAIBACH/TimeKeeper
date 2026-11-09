@@ -92,6 +92,11 @@ class ApprovalRepository {
   Future<List<Map<String, dynamic>>> inbox(Profile actor) async {
     final ids = await team(actor);
     if (ids.isEmpty) return [];
+    final profileRows = await client
+        .from('profiles')
+        .select('id, full_name, email')
+        .inFilter('id', ids);
+    final profiles = {for (final row in profileRows) row['id'] as String: row};
     final result = <Map<String, dynamic>>[];
     for (final table in tables) {
       final rows = await client
@@ -100,7 +105,17 @@ class ApprovalRepository {
           .inFilter('employee_id', ids)
           .eq('status', 'pending')
           .order('created_at');
-      result.addAll(rows.map((row) => {...row, 'table': table}));
+      result.addAll(
+        rows.map((row) {
+          final employee = profiles[row['employee_id']];
+          return {
+            ...row,
+            'table': table,
+            'employee_name': employee?['full_name'],
+            'employee_email': employee?['email'],
+          };
+        }),
+      );
     }
     result.sort(
       (a, b) =>
@@ -124,17 +139,64 @@ class ApprovalRepository {
     if (!(await team(actor)).contains(row['employee_id'])) {
       throw StateError('Đơn không thuộc đội nhóm');
     }
-    await client.rpc(
-      'tv5_decide_request',
-      params: {
-        'p_table': row['table'],
-        'p_id': row['id'],
-        'p_actor': actor.id,
-        'p_approve': approve,
-        'p_reason': reason.trim(),
-      },
-    );
+    await _decideWithCurrentDevPolicy(actor, row, approve, reason.trim());
   }
+
+  /// Cập nhật trực tiếp vì project đang dùng Firebase Auth tách rời Supabase
+  /// Auth và schema dev cho phép role `anon` đọc/ghi. Khi chuyển sang production,
+  /// thay phần này bằng RPC `tv5_decide_request` sau khi cấu hình Firebase JWT
+  /// trong Supabase để việc cập nhật đơn + tạo thông báo chạy trong một transaction.
+  Future<void> _decideWithCurrentDevPolicy(
+    Profile actor,
+    Map<String, dynamic> row,
+    bool approve,
+    String reason,
+  ) async {
+    final table = row['table'] as String;
+    final requestId = row['id'] as String;
+    final status = approve ? 'approved' : 'rejected';
+    final updated = await client
+        .from(table)
+        .update({
+          'status': status,
+          'approved_by': actor.id,
+          'approved_at': DateTime.now().toUtc().toIso8601String(),
+          'reject_reason': approve ? null : reason,
+        })
+        .eq('id', requestId)
+        .eq('status', 'pending')
+        .select('id')
+        .maybeSingle();
+
+    if (updated == null) {
+      throw StateError('Đơn đã được người khác xử lý hoặc không còn tồn tại');
+    }
+
+    await client.from('notifications').insert({
+      'recipient_id': row['employee_id'],
+      'title': approve ? 'Đơn đã được duyệt' : 'Đơn bị từ chối',
+      'body': approve
+          ? 'Quản lý đã duyệt ${_requestTypeLabel(table)} của bạn.'
+          : 'Quản lý đã từ chối ${_requestTypeLabel(table)}: $reason',
+      'type': _notificationType(table),
+      'ref_table': table,
+      'ref_id': requestId,
+    });
+  }
+
+  String _requestTypeLabel(String table) => switch (table) {
+    'ot_requests' => 'đơn tăng ca',
+    'leave_requests' => 'đơn nghỉ phép',
+    'attendance_corrections' => 'đơn bù công',
+    _ => 'đơn',
+  };
+
+  String _notificationType(String table) => switch (table) {
+    'ot_requests' => 'ot',
+    'leave_requests' => 'leave',
+    'attendance_corrections' => 'correction',
+    _ => 'general',
+  };
 
   Future<List<Map<String, dynamic>>> notifications(Profile actor) => client
       .from('notifications')
